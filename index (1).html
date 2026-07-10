@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CareLink</title>
+<style>
+  :root {
+    --primary: #2f7a72;
+    --primary-dark: #1f5a54;
+    --bg-cream: #fdf8f0;
+    --bg-mint: #eaf4f1;
+    --card-bg: #ffffff;
+    --text-dark: #24312f;
+    --text-muted: #7c8a87;
+    --border: #ececec;
+    --danger: #e0453f;
+    --pink-bg: #fde3e6; --pink-fg: #d64a63;
+    --blue-bg: #e3ecfd; --blue-fg: #3f5bd9;
+    --green-bg: #e2f6e6; --green-fg: #29915b;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Arial, Helvetica, sans-serif;
+    background: #f2ede2;
+    color: var(--text-dark);
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .phone {
+    width: 100%;
+    max-width: 460px;
+    min-height: 100vh;
+    background: var(--card-bg);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  /* ---------- Top bar ---------- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    background: #fff;
+  }
+  .topbar .brand { font-weight: 700; font-size: 1.2rem; color: var(--primary-dark); }
+  .bell-wrap { position: relative; cursor: pointer; font-size: 1.3rem; }
+  .bell-badge {
+    position: absolute; top: -6px; right: -8px;
+    background: var(--danger); color: #fff;
+    font-size: 0.65rem; font-weight: bold;
+    border-radius: 999px; padding: 0.05rem 0.4rem;
+  }
+  /* ---------- Screen container ---------- */
+  .screen { flex: 1; overflow-y: auto; }
+  .hidden { display: none !important; }
+  .content-pad { padding: 1.2rem; padding-bottom: 5.5rem; background: linear-gradient(to bottom, var(--bg-mint), var(--bg-cream)); min-height: 100%; }
+
+  /* ---------- Auth / onboarding cards (splash, register, info) ---------- */
+  .auth-wrap { display:flex; align-items:center; justify-content:center; min-height:100vh; background: linear-gradient(to bottom, var(--bg-mint), var(--bg-cream)); padding:1rem; }
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    padding: 1.6rem;
+    text-align: center;
+    width: 100%;
+    max-width: 380px;
+  }
+  h1 { margin: 0.5rem 0; font-size: 1.8rem; color: var(--primary-dark); }
+  h2 { margin: 0 0 0.2rem; font-size: 1.4rem; }
+  .subtitle { color: var(--text-muted); margin-top: 0; font-size: 0.9rem; }
+  button {
+    background: var(--primary);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 1rem;
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    width: 100%;
+    margin: 0.4rem 0;
+    display: block;
+    font-family: inherit;
+  }
+  button.secondary { background: #eee; color: var(--text-dark); }
+  button.danger { background: var(--danger); }
+  button:disabled { opacity: 0.55; cursor: not-allowed; }
+  input, select, textarea {
+    width: 100%;
+    padding: 0.65rem 0.8rem;
+    margin: 0.35rem 0;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    display: block;
+    font-family: inherit;
+  }
+
+  /* ---------- Talk tab ---------- */
+  .talk-center { text-align: center; padding-top: 1rem; }
+  .avatar {
+    width: 84px; height: 84px; border-radius: 50%;
+    background: linear-gradient(160deg,#cfe8e3,#f4e3c8);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem; margin: 0 auto 0.6rem;
+  }
+  .speaker-btn {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--bg-mint); color: var(--primary-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; margin: 1.5rem auto; border: none; cursor: pointer;
+  }
+  .greeting-card { background: #fff; border-radius: var(--radius); padding: 1.2rem; margin: 1rem 0; box-shadow: 0 1px 6px rgba(0,0,0,.05); }
+  #transcript { text-align: left; margin-top: 1rem; max-height: 220px; overflow-y: auto; white-space: pre-wrap; font-size: 0.92rem; }
+  #voiceBtn {
+    width: 96px; height: 96px; border-radius: 50%;
+    background: var(--primary);
+    font-size: 2.2rem; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    margin: 1.6rem auto 0.6rem;
+    box-shadow: 0 6px 18px rgba(47,122,114,.35);
+  }
+  .hint-text { font-size: 0.75rem; color: var(--text-muted); text-align: center; }
+
+  /* ---------- Calendar tab ---------- */
+  .cal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom: 0.6rem; }
+  .cal-header h2 { margin:0; }
+  .fab {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--primary); color: #fff; font-size: 1.4rem;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0; cursor: pointer;
+  }
+  .cal-card { background:#fff; border-radius: var(--radius); padding: 1rem; box-shadow: 0 1px 6px rgba(0,0,0,.05); }
+  .cal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom: 0.6rem; font-weight:600; }
+  .cal-nav button { width: auto; background: none; color: var(--text-dark); padding: 0.2rem 0.6rem; font-size: 1.1rem; }
+  .cal-grid { display:grid; grid-template-columns: repeat(7,1fr); gap: 4px; text-align:center; font-size:0.85rem; }
+  .cal-grid .dow { color: var(--text-muted); font-size: 0.7rem; font-weight:600; padding-bottom: 0.3rem; }
+  .cal-grid .day { padding: 0.45rem 0; border-radius: 50%; cursor:pointer; }
+  .cal-grid .day.muted { color: #ccc; }
+  .cal-grid .day.today { background: var(--primary); color:#fff; }
+  .cal-grid .day.selected:not(.today) { background: var(--bg-mint); font-weight:600; }
+  .agenda-heading { margin: 1rem 0 0.5rem; font-weight:600; color: var(--primary-dark); display:flex; align-items:center; gap:0.4rem; }
+
+  /* ---------- List items (reminders / activity) ---------- */
+  .list-item {
+    display:flex; align-items:center; gap:0.8rem;
+    background:#fff; border-radius: var(--radius);
+    padding: 0.8rem; margin: 0.6rem 0;
+    box-shadow: 0 1px 6px rgba(0,0,0,.05);
+  }
+  .list-item.emergency { border-left: 4px solid var(--danger); }
+  .icon-sq { width: 40px; height: 40px; border-radius: 10px; flex: none; display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+  .icon-sq.pink { background: var(--pink-bg); color: var(--pink-fg); }
+  .icon-sq.blue { background: var(--blue-bg); color: var(--blue-fg); }
+  .icon-sq.green { background: var(--green-bg); color: var(--green-fg); }
+  .li-body { flex: 1; min-width: 0; }
+  .li-title { font-weight: 600; font-size: 0.95rem; }
+  .li-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.15rem; }
+  .li-meta .freq { color: var(--primary); font-weight: 600; }
+  .switch { position: relative; width: 40px; height: 22px; flex: none; }
+  .switch input { opacity:0; width:0; height:0; }
+  .slider-toggle { position:absolute; inset:0; background:#ddd; border-radius:999px; cursor:pointer; transition:.2s; }
+  .slider-toggle:before { content:""; position:absolute; height:16px; width:16px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; }
+  .switch input:checked + .slider-toggle { background: var(--primary); }
+  .switch input:checked + .slider-toggle:before { transform: translateX(18px); }
+  .trash-btn { width: auto; background:none; color:#bbb; font-size:1.1rem; padding:0.3rem; margin:0; }
+  .empty-note { color: var(--text-muted); font-style: italic; text-align:center; padding: 1.5rem 0; }
+
+  /* ---------- Activity feed ---------- */
+  .badge-pill { display:inline-block; font-size:0.68rem; font-weight:700; padding: 0.12rem 0.55rem; border-radius:999px; }
+  .badge-pill.chat { background: var(--blue-bg); color: var(--blue-fg); }
+  .badge-pill.task { background: #fff3d6; color: #9a6d00; }
+  .badge-pill.emergency { background: var(--pink-bg); color: var(--danger); }
+  .badge-pill.completed { background: var(--green-bg); color: var(--green-fg); }
+  .act-row { display:flex; flex-direction:column; gap:0.3rem; flex:1; }
+  .act-top { display:flex; align-items:center; justify-content:space-between; gap:0.5rem; }
+  .act-time { font-size: 0.72rem; color: var(--text-muted); white-space:nowrap; }
+  .act-msg { font-size: 0.88rem; }
+  .act-quote { font-size: 0.78rem; color: var(--text-muted); }
+
+  /* ---------- Family tab ---------- */
+  .member-row { display:flex; align-items:center; gap:0.6rem; padding:0.5rem 0; border-bottom:1px solid var(--border); }
+  .member-dot { width:34px; height:34px; border-radius:50%; background:var(--bg-mint); color:var(--primary-dark); display:flex; align-items:center; justify-content:center; font-weight:700; }
+  .invite-box { background: var(--bg-mint); border-radius: 12px; padding: 0.8rem; text-align:left; font-size:0.85rem; word-break:break-all; }
+
+  /* ---------- Emergency tab ---------- */
+  .sos-btn {
+    width: 140px; height: 140px; border-radius: 50%;
+    background: var(--danger); color:#fff; font-size:1.3rem; font-weight:700;
+    margin: 1.5rem auto; display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 8px 20px rgba(224,69,63,.35);
+  }
+
+  /* ---------- Settings tab ---------- */
+  .settings-card { background:#fff; border-radius: var(--radius); padding: 1.1rem; margin-bottom: 1rem; box-shadow: 0 1px 6px rgba(0,0,0,.05); text-align:left; }
+  .settings-row-title { display:flex; align-items:center; gap:0.6rem; font-weight:600; margin-bottom:0.6rem; }
+  .settings-row-title .icon-circle { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.1rem; background: var(--bg-mint); }
+  .toggle-line { display:flex; align-items:center; justify-content:space-between; }
+  input[type="range"] { width:100%; accent-color: var(--primary); }
+  .about-box { background: linear-gradient(160deg,#f4e9d8,#eaf4f1); border-radius:12px; padding:0.8rem; display:flex; gap:0.8rem; align-items:center; }
+  .about-box .avatar { width:44px; height:44px; margin:0; font-size:1.4rem; }
+
+  /* ---------- Bottom nav ---------- */
+  .bottom-nav {
+    position: sticky; bottom: 0; left:0; right:0;
+    display:flex; background:#fff; border-top: 1px solid var(--border);
+    padding: 0.4rem 0.2rem calc(0.4rem + env(safe-area-inset-bottom));
+  }
+  .nav-item {
+    flex: 1; text-align:center; background:none; border:none; color:#9aa5a2;
+    font-size: 0.65rem; padding: 0.3rem 0.1rem; margin:0; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:0.15rem;
+    border-radius: 0;
+  }
+  .nav-item .nav-icon { font-size: 1.15rem; }
+  .nav-item.nav-active { color: var(--primary); font-weight:700; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- ============ SPLASH ============ -->
+  <div id="splash" class="screen">
+    <div class="auth-wrap">
+      <div class="card">
+        <h1>❤️ CareLink</h1>
+        <p class="subtitle">A Caring Companion for Families</p>
+        <button id="getStarted">Get Started</button>
+        <button class="secondary" id="signIn">Sign In</button>
+        <button class="secondary" id="learnMoreBtn">Learn More</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ REGISTER ============ -->
+  <div id="register" class="screen hidden">
+    <div class="auth-wrap">
+      <div class="card">
+        <h2>Register</h2>
+        <input type="text" id="name" placeholder="Full Name" />
+        <input type="email" id="email" placeholder="Email" />
+        <input type="password" id="pwd" placeholder="Password" />
+        <select id="role">
+          <option value="parent">Parent</option>
+          <option value="child">Child</option>
+          <option value="caregiver">Caregiver</option>
+        </select>
+        <button id="registerBtn">Create Account</button>
+        <button class="secondary" id="backFromRegister">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ INFO / LEARN MORE ============ -->
+  <div id="info" class="screen hidden">
+    <div class="auth-wrap">
+      <div class="card" style="text-align:left; max-width:420px;">
+        <h2 style="text-align:center;">CareLink – Voice-first AI companion</h2>
+        <p>One large button → Tap and speak.</p>
+        <p>AI responds in Hindi, English, or Hinglish.</p>
+        <p>Handles daily conversations and reminders.</p>
+        <p>Detects urgent situations and alerts the child instantly.</p>
+        <h3>How It Works</h3>
+        <ol>
+          <li>Parent taps the mic and speaks naturally</li>
+          <li>AI understands the request and responds by voice</li>
+          <li>AI classifies the request: chat, task, or emergency</li>
+          <li>Family group receives a notification with context</li>
+        </ol>
+        <h3>Core Features</h3>
+        <ul>
+          <li>✅ Voice Conversation</li>
+          <li>✅ Reminders (medicine, daily tasks)</li>
+          <li>✅ Emergency Escalation</li>
+          <li>✅ In-app Alerts</li>
+        </ul>
+        <button class="secondary" id="backFromInfo">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MAIN APP ============ -->
+  <div id="main" class="screen hidden" style="display:flex; flex-direction:column; min-height:100vh;">
+    <div class="topbar">
+      <span class="brand" style="display:flex;align-items:center;gap:0.5rem;"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2BqGFAABDUklEQVR42s29eZxc13EeWnXOuVt3T8+CGcwMMDPYQZAESXAR952UTVGWLFlSbMmOktjxS2zneX2OXxwrcfLsOM/yEttx4t9LvDwvka01kiyJFM19EUmABImF2PfZ95ne7nJOVf44997umcEAAxJK0hJBTE+z+3bdOnW++uqrOjg6OYWIAMDMAAAArT/av7+XR/627/Gx8kpWu8L38onv/fsuuwBEtD+Kq/ipK7/h1bLy/7THe7/g1d5Brfxd/iMzX9pf8t/aV9q7l9/Dq/RABLafAQD8XVsxrW94Vfx62eWp977K7Hu12vqqXWX2v/zNERBwyZfg9N+I9p//1Y/VLKDe9br47gUKBmAiABAohECBwhqbmJg0MQPbpQNCSBSohEREA8xkiNJb8r9V8GG+nKH/JwdZsvsbCEcqIZgM6YRio0lrbYwhMsYQERNRtowECiGF4ziu77quo6QCQGImYiEAABCQ3230WLbfLosqjACwxndHBf97PIgZmCWilBKYtEmiUBttDAOwDR6MAIgohCAAwWytQEykSWsdhqEQwnGl73m+FwglDRETo3g37r3a2r00GLuEX/6vNzQDsCEpUCkFTEkSa6OJiAkBBAIBIOe7IKePpXgUAFAIgYhGc1U36o3Q8zw/8B2ljGFmRiG+e9e/lhup/tc7MrDrKAGsdULGUL7TIlgvTgFH7k0ACEAZvFnpXFJIAIgjHccV33OCQhFRJkx2J125WV16A7/89o5NLISw6ovXgKMRAREEMr5XYN+6TTGAISMF+I4CNkmSEBHkn5i9phXSob0SxPSNUhjCgIxi+QcJgVKIxOhKdTFJIkcKACZi5uUXf2k7rvxt/p8vj868/Duu1aNTUJy9KbYs4Yt+/Np3TmJGhkA5QmCiNRMt2XysOQAFIiARpQHDUPpgZiKy+A+tIwGCYEAUAvNrF0LY+xLFkTHG9wMSqImEsFjwKqD+VlvzJe+cuPyeYP9/NXIqZiZmQ4RMvusggtYaecm2zsCI6QbGTMZkSKOFIWh6jb00ZiImQ2SMvQGIUghgMJBuXcgMYRgBkaMkGbJ37t1ZOd8klu4zF8+nrjhGX5V8iRmISCIEnkMZ5rU5ib1QFEJw7rWpWaWUbAEdUatpcnPbPwAAUTAjMQGDRCUEYHrl6YaVxLEC5Tkq1iZ/h6sAYRGypbXqQ1zRnXwP1yKYkQwpgQXfZWoukty5rNGZrBOCECAEI6Ywg1o/PQN8LRgEEFEgSIESBQIyExsAFEpJRAHMKBgEExmtE09JYDbGXLVEIctY381meBUZGQYgQ47Aou/ZhDn3RyGElJIRrCfaXDC7AanbAQqBSx8tTyyPks19EpkMEUkhpLU1IgAQkTaJ60hIVwr/T0jWxGUQoriCcLEqjAdko6WAIPBtDAXAVke2iR4KgSKNJIgIwu5xltBgsHk32V0j3TYuAtSyuA0AKAAF2l0UAISQ6cuEYAY2xncdXtXOLV8HlwOnS0TR1X4lLs+bXSY04+U3QGMEcKngA3D2bmxzPOtf+e7XDAHZRzMiAAsGAJu6IDDmXFIWo3EJaEmDNgNQ81OAGVjYrAZAIDIDMPm+YiaGtZLva3Hzi76PuOSrMb/0lW+B6RaDrbZuYsxWIMFULBZWe0H23VMDYfalU9PbqwBs7nlof4nL6ENrU8zTElhCVuThCNOPS6GIBPQdZUyaGi2xkcDVvIgzomPtVK+4yHO4FCcyL7vhufukq7glNrZy2QxADETUVgjEUtC60tyZT2aYnQGYbWoiUDYXrPVO4Et5EGe3A1JYbeN+K2MOmMIEJlBKuo4y2iyn2plTH+OLVXb4YjjvEjj6Yn6OTQS9SkEgy4svmWIxs04Knus4zkor54u6FWNhawBBASiAkYkhu6kWk7RwHk3YsWxXzOI1pJ/C0Iq+BYr83jKx70gl0BjKsQ3n6JhXAapXCBTExczPa4tQCMC4+uIyhpSUvufliV+r17cyFfmKZmYCxjSiMRhjjDFMbB0wW21LLItIlsMj4gw2EpBhFigQRRb2hY1xdsMF4DQ0ifQdC56LrR7KfGl7XOTutoLN5fFzRcKCV3a3Vn0pESFzsVDIUjW8iHGxiT2YyBB5ynGUTJiqSRxrEEoELiqGKE5qcUy0NPtiJgDJXHRcdIQBjhgMCF+JouMAQ0SJ5auzxSts8oJSADMQCymzqwIpROC5tTASjlpZ6FktWi9jrpdldi1GX8FHr6wfrrYX43JOBZtrjtlo3RYEuWWpJanDFfHa+n6pEJyeX3jpxNl9YyMXKpU40VKIvqC4q7vnjg0brmnvMHFSjyIJyEIYQwRcct0KmZenJ/ZPT56tVCpJBAztrre5veO2vv7bNvR3uV5DJ3bvImAhRVr0EpbQZmt9IQQzuK5KtI41KSWX4fKVcXW1pbyquUYnp65K+dKyYnZv1MY4iKViYZn/Lqsx2j8TbUq+OxmFf7r/za8fPTLeqDOizKCIIWKidse9a+PAp3bt3lFqqzUa2pAEQEe9OD7yxZPHTi7MJ8RSCCEEMhtgQ+wAbO/s/OTumz64bStokzAoIUSGTJqYZykXyAAL1ZoQSuDF3TjLQq+MTWPGd2PoyxIupE2p4Oe4bWUlN/+LNqYc+K+MDP/KU0+eXJwvBYESMt9sM5AGCVM9irqV96M37Hm4f6MLXCXz/x0+8NTweZTSlwpXBkCAhtZxHH9g27Z/ec8D7Y4MDbtCMIJYig7tbpn9iWEUVxux46irWHe8vKGvlBRnZq21K2Xgu8yc70Ur9w1r5Y5C4evHj/7iE9+KEXzfBWKBAgCJiYARUArBTIbZQVE3pkj0x+9/HBE/8/Lzhxbmy4UCss0kwQBoYABwAAWiLSkIFHP12s3re3/7ex7v94PQaNVqVkSb/eZezUyIYr5SY0QlxZXSv5cw9Bpo0otnN3hRwGiYmNlVyhiyXN1KQtL+xRhqLwTfOnPyF779TfacwHXZMCDW4rgaNpjYEwKZq42wEkYpoNfJz95+d0+57df3fefg4lxHENhiecRmMQxjnfgofBSR1vP1epwkgGiIugrFA9PTP/PE386b2FfS0rB5GaE1kljZAjAHvktGX12uQ72r0IwX3Q2YmRLtKmnzGLE0u2l9E0NU8N13pqf/+be+SVL5ApkxMYbC+M6NAw9v27FrXZcrZSOJT83NvzJ84fXR4cla40Nbtnx467Zfe/Wl12cmO4OCMQQoFsNwc7ntwR27bujuXhcUEHAyDA9MTrxw/sy56mLJLxqiNt97a2ryXz3zzB88/n1CxwjNMk3OWuUOYYgcKZUQxhil1FWTtF1RjGZujbnLKk2sDVESF3wfsmKoWMqxNUM2oHDUP/jiX786NlryA4FQi5Ohtrafu/Oe+wYHS66HKS8NRLoehW9MjP/J/v0/e+tt5yuLv/TS8wXPRQYi0Dr+6I6dP7jz2t6grJQSElAIhUKbZKrR+PLJ439++KBAlIgocK7R+NX7Hvzxm2+ZbzSkEDZmtLpzKwpOEl0NQ8f1REpA8Hc3Rl+kdsN5dLbcUNNVoyh2JTpKWddYZuU8DzTMnYXCH+/f9yvPPd0RBEhYicIbu3t+7/EPb+nsqMbR8LlTJw7tnxwb8X2/b3Dz4LZd3V29lUajEoX/57NPnW/UC1JpANDJT+ze88HN28nE1enRqVNHR4fP1rToHNpx8513DW7YQEZ/68zZf/viMwaFEjIGKgvx1x/7ocFSW2woz87TtWhNSQwMxMQAtXoDhJTSAaD3uDEyvztdByMvhTiWimQi4agcMqdAVeRANU03XClHKpX/+sY+3/EEiLpOtpRLv/eBD25dt25sauzZr//NwdefH7kwHDcapULQ0dHZt2Xb7rsfvvXWB/77yeOn5ufLQYGYtUl+6oabPzS0fW7i3OLBF0cO7B0+f36uFi02oiNjM0nb+h/88Z/65Kc//f07tgPwZ557hl3pCjlar/+XN/b9+/d/T9yImjEty8uX5PXAjpJhYoSQF7XylZac5C/84j+/8lpCTiQ0n9RxIpClROCLpKf5ZsgM5cD787ff/PrxY2XfS5g9Ab//gQ/ftHHjwcNv/eFvfGbs7MlC4AGgUk5bsVRqa4uTRrmts3/XDb/zxmuLWjuI1TB8dGDoH+26sTY3Eh9+vjFyyhjNAG1tbe3lNt+V9cXZr3zpq2cvXLj7wUdu2bAhZn5l+IKjlEI8Mz3z0NatvaWiZhatoDOzcFr2ZUYUiTaAKC5GCF1hYQ+vuMKCSIi0NBNmIjJGS4HcUqLOr9j+3f5FIsxF4deOH3ddD0DUGo1P37jn7q3bL4yd/8+f/dXJ0eFSewdKD4GRNDEZJhZi1+5bXx8dPzYzGzhOwtztej+4baduzJfmTvsK120cait3lkpt69a1+65QyBu6Ou7dPXToyS/84a/9Cij5j/fcsntddyOKXKlmkuiJk6c8x10ixEHIrZx7NDMJgaTNd73CckmCY8n91NqkbA5BbuVW78hVBr7jvDE6enxurug4DZ0MlEo/cuMtcRI9+eW/ri8ulMplow1KJaWQQkqhjNEdnT3rN25+4sRRw4wIEZvv3bZtS0f5tVeee+fgQbtKPL/QtX59W3unF5SUF9gP3L1t0/5vfv6v//zPerq6fuT63SZJGNjz3afOnpoLI5VFZ840f036nIiJCVhKMGwr63iREgdeQQquLlssWIFvbPmDkXN3Zq0TIYCYkIWtnrRSHPlbEREiPHf6VJzosudHSf3DN9w4sG7dKy98+/SRA+VyOY4TIYWUEpWDUioltdGDm3dWlfv21LjvOJHWnY7z2JZt02PDcVg7OLzgxA1XOftPDZ+bnq8tVEk3wrDhSeFJlAiDPV2f+4+fvfehRz5w3e4/OXDgxOJc0fOOz84cnpy8c2N/LU6wVVNB1AzUwJySyGSMEUKt4HbWKgZbs67jci+wIk+BQGQoU7m0unNzYwRYCMN9IyOulLHR7b73kd031irzzz/xVeW4aaVQoEChpINSWFzV3dM3Uq3OJ9pXKk7Mje1dfY5z/vyJQuBu2bnt5beOvXPk+Msvv3bm5Ml17V4gwEMwOg6kaC/4xWIxnh3/4l/9WVep9Ni2bTEZKbAexy+dP6ukai44YjbExPmOnUUQloBGG75EbfFiOqy1GvrSkT6tgGTvYLQGJiBLAy+PGMxMZJjZkHGkGK1WL9QqnuM0kmRXV/eu3r6339o7OnyuXG4HZmLNRABGCBKMzCAZdRT5QgATSKGR7h4Yqs3NLM5OSJShpo3X3Nje2Xnths6i5B1bt/vFthNjM0EQ3HjNlo5iEMWms1ze+/QTtcWFB7fvaHP9xBiFeGh8LDEGs6CRhuas8m7ZfktwowBDOqspN+HASkkYX6xefBlDry0dQntp2hiBqWS5xbipxXP/NtooIU/Nz9e0dqSIdXLz+l6J+PorL/mu73uukAJBMGugBJjSwgSKC+dPbevoeGRg09TC/J29/fdsHJgYPw/GMGC5XP6Bjzx27yOPlDs6Nw8NHjk3fma60h74d91yQ3e5TAnFWivPq0+ef+ftN2/YsHFTqdiIteM456uLs2FDCkHGEBMxU361TPk+ScQ2Nuu00MW5rOSK7Ib4LtWkzUScyJBOlICWiyORs71CpHmtIQZAgtOzswmloq8dPet12Dh+6GBHyctq4QJMzJqFkIiCiZXnjZ0/NXLyyD+/9/6HNm/d1t7JtYXp0XOOchExChsNw+WuHlc4uwbXb9iybXbXUMFTZUeePXGiEWttyHWE1OGxt/e+776HBoqlwzMzbUEw3WhM1Grb28oRZ90bTbzRkiVySqUaowFUc0u88rxcvFtDp5uk1gkbDcTEnIvklnl09iNooJHKIgAY4ILrbu5cNzM1MTs9EcdJGIZIHCdJojVIKZVCwem+Svqlp74yc/bY+9rLZmbs0N6XTBRKpQCYpZidnJwfH0VjFqfn2hx1//33XbtjR2N+dqFSbUSJJnJQeEqdO3EUADZ3dpExCrGuk6lqVaSSknRnSf3Rig+I02YOYCGQTELERJgWfhkBxBV1Eqi1wTmRl06WlaOSRAOnev2sEsbL3DnzcdKG5hoNgWCISsrpLbVND5+uVyv1erlScaI4qjdC3VZwlWsUgxBWDCOlShrV157+22K5XWstmF3fs84mEEdm5z0Pfc87euZCqf3o0JatlcmpsNZoRLoRaymkQFbKvXD+PBANdnTa4qEhXohCbM0MM4UJZT5twbVNgYlYG+OKVHGS1sjxKhsa8wpUxg3lNWI2OgFgyvoemDlV2q6sCgJokzSSSCAyceCpwHWnqhUmHYVhWG+EUZgkkRSOEFIAIorUCkwohFKOiSJHKVSSgfMidiKkVyoZhF1bNx87/E5vz7pywZuYXphdrGpmJQUjG+EsVGsURZ2FQAgEBjJUi2IGJrK7Li9LEclu77ZgiCgAjNaQlvPTROJKHJrVmiMytNz79JK0MaS1lGg1iEIItiuKl6sXiUggajIamK3vACBgEseWm040IyrP85USWuskjoiN7cfKaUMpFaKwqni0MipEqcTC6Oj0xHQYJ5Ozi8eOn2xrK50Ym5ir11A4jkIDIhGSosiQcaSyi5+BY6PTOLeUustFa8AMyJQKidFo3VzKV8joXb4ra9nWmVueGQFYa82WeWbOKQ6rCM33w1y/YYAlkcj4UmLWZKSSgMjAQmIhCBDBkI7jKNFx1kJB6Xvbz7ByLitIQkSJ2ph3pmf79+ypjQ/HHGs2p0ZHEzaOVMTkCDdBbBD7gCiEIYO57swqTlv0zrmWldK4QWluBiAQE62tu2TCLRs/+KqFjowX5eVPMuskZmYgyNzCCjhzBdMSdMkEoNATCgFQCs0cxqHjeowChSgWSwLq1WqlVq25CqUUAtB+bateT4OmpezTf4FAQYaCoS3rr7spGD23MPnlY+emZucru7f3ipIYnponlDEwJ3pduU1KuVhvWOAshHClXObRua/Yr8LATCIriSERG51IiQgCsmVxtVAH8gqJWbpmmYk5SRIAzPbrFPK3Ao8m9mAmMsjU5rjEoBBrOpmqVsptHY7jCUTHcYC50WhEiWYGkfkLEbEh0pnonzNKttmKgBKg0qiHxZ6e8gYOabC3vaOgoijWzLNhYoTnoNnQ34eOO1at2otTCG2eyiHzMkYpl4ExN5NbYKONyQq/V2ZlG+XXmH8vFQsAkDFGa2hmq8iMWZ2wKRVPUywibQwSdwcFAJYgqlF0YXa2s6urvbOrUavpREc6AWDlKLssiJgIiNgqtYzWURgCGEfIsu86SqFSxlZWpWSt46EtXTdf3+kb34FqPY4THTZqHbtvlVtv1AYHt+4ExOGFeUYgZkfIDs+3QvRM5dRibmJDwGTdhoCBGIDRpi0tvWFXIgl7N3pnBmA2Rmud5ASYza1yeX6qKmpxbWJm4o2lkhDIAAnz2bkFx/V/5Md/8ra776tUa416A8iA0aR1YjTZjM2QTpJavR4bc9+tN2/Ri3ddu33d9Hl9+HU5ecEHQygBkHUSeYWh+x58/JE7dg1tIOLZSkXtvOmhn/qlunSnZ2Z3XntdmCTDlUWlVGJM2XV7/EKsDWRX2xrrrGnzAEhsc3GR7kmXNPSlphtcOjpfDHJYalQvyaCQuVnpssBpSS0OgROjh9pKvlDEpIQ8NjdtCNra2jdv3rK+r//0qVNokmIxEEjVuZlarWYBhu/7Q+s7b7nlJjlxDsKEJkee/8rXOrt7eqOE5qe7bri1igqQFdMwB0IUpydnzkxXxtZv2/HoD3R09yg2be3la6+/8dz0zPnKYuA4caL7gmKH6yZaZ3E5S1bslktMbBs9UmxhmFCgSbQhFgIvKeDCd42jm5DDojUL5rQ20JK15rIVRMFAFuRbYJe/SWxMn1/o9IPZMPSUOjwzPbq4WCi29Q0N9W4cuvfRxxZmp8La4tn9b5wYHWXD89XK5v6+jz/+eLIwU3TE0888c+sP/tjwa8+9enh4900d111X1sTi1KHx2VrfrXcV27pm5qu1Wx/TXVu2BeUzR4+HRusoRoEbtu3qHdz89FtvT9Zr5aBQi+KtXZ2eVGEUZTJqytPdzHOyNiYGAiAEQNsjRpnNrigLv2TNMJUIN727Fd8ZbZLmRtHURqLV2adtgCBtGm2Tw8SYTs/b0dHxwshwm+uO1+p7h4cfHRqo1haSKDp+dH9Czgtf/9LCuaMPPXTPww/ccW50stPFyjtvnTw1+sAPf3pykaDR2P/qG+PCnz58nBvVns5OUDBXrWKtuqlQhp7t9bau/oc+mDTqycHDhighUoW2PQ9/QLjBc2dPaQBgkAi3rF9PxjTlx9nIiixYIwIT5P0bnCWDbCgBViAkrBROv4eaYSvBmpcBkZiITa1aZSKRaTWtHGWpAoGzddDsDQ2Umo3jV8dHfMepa006eWBokyGzMDU+cupUo9qA6TP/4B98cuu2Td29fZsHNm4Y2HDhyNHZuWr12OHjhw4tnjvz+qFjN163mSUcGJmZmq9OLyyWS4Uy6on9r9TaOrGnXyWJTpI3Dx5Y19U9tHEobNQ/+vBDc8y/v+81QEEMZcf90RtuKghhOGUcGVqavxgyz8naZTJJepIkrus4rgMoQOBqueFFJedijapcTDlYBmBAImbbtt0kvACYrdqiGZabCW22iYRxcmN3d7vnxcYEjnpzbvrk/GxXV8+Fc2fm5+YrUxOPP/7+nsGtTnFd3IgqM9OanOs+8OEHPvTYufHxh3/oYx1bBjr6u7s7StsGerdu7tOeWiQ+NjY7F5LRPPH8twI2mo0QUippdDI1N3PnrbdsH9r0348cnAwbvlSh1ru6120olBqJzjqLiMikDKk1NJFhMBZ3MOcoCplNjvB4jSryy+DovDll5fST7NKMTrmVnDAHZsK8GMEtiXguNA51srlQ2t3Z3dCJK2VF62+dPesp3xg5fH6M4poEnp+akJ7PKIQXCL+EQTuvH/jQZ/71nvc/2ttZ3LxhXY2xv693z45Nj9+75+4913il4vBMpdTV7c5NzO57yaAjlXQcZ3p2xkNx7fqeC4sL3zh50lOOJcYfGBhUDDrveDbc6g3MTEjEmjjtjgZi2zUNKLSh1m6Stafg4hK/W7U3mZENkyFMQ7OVrGU1NBYWU0Pr0Acb/oiZEQ0/MrhJABhmz1FPXzh/YHxs9y13RoalgrBWaVTmk7AxNzoyOz5eXVw8vn/f1PkzYXXhyMsvzs0v9K3vliiUVLu2be7p6enq6d65aUNXV3vCUAoK4995uj455jhue6k0PjWxzpUbyqWvnzx5anHBd5zI6IFS2129/fU4AgYiwwREwAaYgIizUTdIDNa7KasnAgEAWk0hMF6pdGntfHQzS0whPnHWkoN5V1Gau2adgblT2zVo10g9id/XvX57uSPS2kUxG0dfPHqkc13Pjffcd/jgO8Mj47UwjKNIJwlLt94Iy51dcbVy9MVnh0+dJieIUF2zbZP0fSI0jbBerVeq1ZKnRsYnNUqqzMy+s1c4TsHzldE39K67sFj50snjvnIEQ83ohwc3dXtepBNgJoNEVvyf1ViYiAhTS+eebrdIss3p2de8so5PcfkC+lIc3arTaGlZyoMDMgvI+zAzYJ32KzICgGEuSfm9Q5tsx33BdZ+fGHl9ZPiuex+I/fLJM2erCwsnjxwenZ4fH5+gRrUyM/nWay+fvTBS7ugUYa2rq2tg27bNfeunpqeU63WXSoErqmFYi/TY9FzBcRsTYzpOpOP+wL33b+jo/LMD+89XKoGUMdE6z3ts05YwjLOvYNeZseXZvAc9pUCIoSUFg5zbyzKZK9LQiIuVTlazOLe2qNiPWnZTs3ZABsAmcQuIjLYt04aXehw/PDC0pdze0FoIrAP/5fEj6DiPfuwHn3vz2PzsXDw3szA5vr6npz4/88K3n3zz8ImRsfETR09ECSeV6uLIhaRe7VnXPT8zPTo80oiMId7Q3VkuBdUwjBYX52emb7v++r/3wAOvjo5888zpousyYl0njw1tGSoUGokGAiYio1NTEjHlGx5Qmtoyt2ztxAS202Z58oZr8Wyx0p0vKr1e3srXpBZz5StkDZcsWpoCM6TS7HZGRA3cIdRHtu1ITAIMgeO8MT/ztRNH77nrPn/Hnt//3NeLpfbu7nUzo8OSdCnwK9Xw5NGTh8+Obdt27Zv7Dk5OV5JKtTI3Pz01OzO/wMSR1ufGpsYmphbr4eS5UxMHX7//+t2+cL5x/MhYvYbEkdH9QfDxbTsbYZyP/kg1Vq3UATdd2mQRL09iKGUamJla1J34rnE0rQwjLe8LxBTGjXq95nkeA6UTTKDJYGZdrphjcSHyl9g2Voy13trReWBudqxe9aRkAafm5m7sWPfwHXd+/dt/B425nvZ2pVSjEV577TWDZTW7UH32+Pjm9sKRIyffd9/9kyePHTo3LF0Va93me5E2k/O1RW0efuTB2267aXOAsrEIhfK29QNF15mJGrPV6o/s2n1XT18tiezFZR2LQFnPeeY9xM2GYYSW8QlEZAyV2opSCtEc0oRw+ZF7uMzQ2EyVlkLsvCGZGQxTFIX1Wt33vdylARmQ8jbiJR+OAgGEwOwZREQDEAjZV257bvicFTXP6nimUv3Qtbuv333tsy88MzM946PsGRiYmpwShvbsuXHL5sH9B48cGB7f0umNXxgfnaut6+xwHVVZrMzOzA9u2fTPfuLHdu/YrOJqNDN+4o1Xjx7Yv3PbroeuufH2vv57Nw7cvm69TiKLIBBEzmOQxUyZLIzSkmxrD3Bqdm20IVMqlaSUQohLrPjLGzpbCLjiP82RtTFEURQ16vXA8231AQSmva5g27jTthAhsFXvnU7ewfSphMzW9o7ZuPH21JSvlCPlmdpim3Tef8NN1aixb/9eNqbseefOndYs+jYM7t6+5aZbbljft+6VffuFF7Qp59DZ4e0DvVp519685wd/5O/5mLzw5BMnT50ZG5+aq9Rmz5+tXjgW6nrZLw10dLOxcJbst0tDHwLl/VfcHCNjR50gthTkAA2TJlNua7dFtaasfg2GVivoOs5NzqtliQzASIx5a7wAzMKNQJH2SaM1KIs0RFsXSMu4goFQyCiJP33tjXvHJyfC0FXCdZw/P3ZoV/e6j3z0h8bPnz649xWFIpqaGg2KQVCoV/ukkvfccoNg+Na3nr1355ZbH3noltt2x42KFOrk/n0zExMHjpyMDEmBhgilqMxMXnjmq0hQXD/AbEQ6GwqzXZnShniGjNfBXKK/ogccmBFYQEvFf0Un2BpKWcuCOl86v2RmQ5g7vnXTJr2RdgWnDdgt4qmsHUowIjAboB7f/ambbv2Vl59j6TmAC2T+YP8bf/jYB//h//Gz/+bMmcD3tw4M1Y2ZHxuvVaqO6y4uVu69/96Rk2fe9+CD/YO9C9Pjh/a+Pj27sNCox5oTw67j1qOQAZSExXq9radv0633MZl8V87bxfLqJzJSE6emtAymZD3noZyapPCVUXcA1Bo6cG3ZJBtDcRTVqtVioZDPbBCY9rELIQA4basQiCBAMKLtpRTpxijToYBSCG3MrnXrZqJw/8SE77iulMO1ykK9/gO33dm3YeBrX/2y9J37b7m5q1S+MDp69OTpcrnjxnseGDn01vGTZ8bOnV6YGHv1wIkTw1NTi9XIULEUsNYNrcPEeFIC6Qf/4c+VB3ZQFFkhVOoUqcNyVrLPClTcbNZLK5OWYEIGIZJEM1C51C6lErJ1xIi4ZAM9LkMdazQ0EFGSxJXqYqlYRIHIWVNQNhkjC9AC8sgMAhHTJxCFtFVoFAhSSSba079x39joWL3uCaEcdWBqsoD4yfsfVKXCK9954dzk1Pj4ZIerNq7vmqvWk7jx4nMvv/L24cnp2fOjE5PVmB1362DP1oHeJEkm5xYbiTbE8zMzd3z4U+/74CcalYoQKm0kBHvXm9MLm5uZgFwDlG0mwHkDC4ok0cxcLpelkiiwZUjfpeMGLonR+ayty2eWmGFtZpQSLS1uZxgxAlCz6TedHaCy2CgRuRnIgW1LEQN2OOqX77nvJ5/4RsIsAILA+/19r+3o7vnEp35sfmr821/7gunsqdYWN0Lgut7eZ5/pbPPuumkHoOjtXucHbpwkURJPzc6en5ipJ4bYzExO7dhz5yM/8pO1akNKleq5scltipQ5sHWgdHwHMrbqnhmYEASkdXcisr7CKdmxJte0zJu6Qh2pnTJI6XYMoFCk8ChDdAhofdX2S2YdiSJzgSyZQcmWp0EhhYwM3dLT+/N33P1vXnquFBQUU6TUrzz79Kaurh/9iZ+fGB89/fYb7b09F6r1hXOjIgx7y4HrCOW4YRInSTxfrQxPzs7UqvOVWqK1X2rru/bWf/KZ33Bdz8Q1FJLZoE1WGRAQyEqQLGfAuVDHurxIhRvUbEFEEADGGCndNPqkMjnMEATiqlo8Bmi2v+HaGBImpiSJG43w/PlzPV3dBT8wRAicTjxDBGAUKR5JDQ1pq3JLlQClkLB0RA8DlEvFX33hub88fLCrWCKgWpxsK5X+6hOfbEf4zV/9hfHTx9q7egyZJKxX5+arcwuV+QVFtKG7q1IPz0+MQ1DcvHvP7fc9fMud92zauoNYRFHDhjtjDIo8JRFWOYOApllpszHDsFWI2ToGNjtxpFSzs3PFQrG3r1c5rlLS1g5X5nQrs+vWPsM1GRqRiThO4jAKz587397W1tHeYbTGLMNGEACMElIfFjkGYWzOJ8mMm8+ry7ZOKZCk+qd/+9XXJsfafI8B5huNe/o2/vHHPr44MfZ7/+6X6zOT7eUySgDl1RYWb3/oe0t++XO//Wvj84t3P/79n/j0j956+11VTdXKYtxo2PKxIct8GkgHvmVqnoy0WcIrpGNprVxXEACk0g4QQk5NTXd2dnb39DiOkkqJpRh4dY9uGhrXKPm11b8kicI4Gr4w4rlOb3eP1tq2yqJgYJui2Pq1SKeqZdkh5t3tqXsjMwjR2pCNvqPGwvDTX/78eBh6jgLExUb9ewY3f/Z7Hp84f+qv/ug348psoVSuLC5e9777fvjHfrbU3j5y4lgY1rfdcPNcHP23118PjPnwtdeFcWwnANhps3YCLBGl09YpDQmWAM3n4VklWMayC1tJFPa+oJyYnOzt7e3s7HRdJYVa6YWXMLRFHZj2m6/B0MBsB5PXanWdJB0d7UyMFiCjHRYvMNvlRJoxYjopw47UEBaBCCFQAAghc0MrJROm9aXCjf0Df3v0kEYUiJ7jvjM1dWFu9nuv3b1l264zJ49W5mZvuueRj3z8Rw/PzP7p668NbNqky+1/+torP/PlL40tVH72gQc8KRia08LysU1p926K8ETeBZw3XTflsoiAojnfDYVhrlarnZ2dnudJIaRcnoJfkjXNUAdmusXLgmhbSEFAR6lKrQZs0xEEYXnorO1bNLNuG1Ga3zhDswIFC142y8qRqhYld20c+I1HH/u5J78hvADZtBcL3zh3RjD94vvufvTDP3z0yFsPfc/HTlUq//fTTxxbWPjLdw6AxOkwubbc/l8+/oluz6tHkZQy3bwJDQARg2Cyqm1s9j22jMtKs5h0GBxnw8bsPi/QRDEAKSlxlUi7Oo7AVLZr+dUrmEuBCICO68ZJwkRSClttSUcDInCWr9hInW3TqaVFC/jIG5jzH4UQAsRcrfqRnbtma/V//fyzxWJARO2+/40L5yJt/tnuGx/oGzw0O/ub+/eei6LutpJhDrW5tqPzTz768Q3FYjWKpJJkqLVTClMYl1KjQiIbAJFqc21lGTJFbj4aLs1pEYWUSZJIgUIKeFfjs1WWUePatWT24l0liU2sk8B37dwMwFTFgSisar11rgFmEbqV91o6bVTkjQRCiNla9Ydv2D1dr/3BvtdKhSIxl3zv22PDCdMj/YP/6dD+SaMLrkvMsdFtBL/z2OPbOzqqUaSkNET5hzCzlDK1YnpaAwIK2/RoiX4AK3fHDOmhpW/QCpIRECCKY8dxZTZ5bLUK1Bpku7z2zB0RUSophAjDRqkQWKZFpD3i1srpeEohspJAqzUzkfHKIRO51BBRLNTr/+TmW+pJ8l8P7G8PCpqozfO+MzXxnYlxIWXgOAycEBVR/O4Hv29Pz/qFet11HJuMcMvtzKd6p/0TdqojIggSiIYIQZBgRGQDDJLRZGsRbfEWgMMwKreVMRv+faXdxqpVjrTGsGGNJaV0HKdWq63v7kYkREABIk24BLTgi8yVm8OMcGn0gKXzRVO5EBGwqDUaP3nTnsToPz98qC0IiMlRKs/oYm18gM8++tjd/X0L9YbvucvOOGpdPa2tN9adc/jDjAIEIAASZMm4nXiBiBKQCeI48Xxv9bjBl5YwqktYmVdnQCyj4XletVa3zstImO4nKXuLKfxAu/+khAcsMfSymV2tDftEBEAE2IiSf3rDHmD4yyOHA98DAAIjUTSMKQL8+4fef3dv72Ij9FyXMuXUytlUzKyUMsY0ez4kAwtkAkS29cxU+oUp+hMobO4K2IgiYHJdzw62tlAOV+x471JusIo0ldOBuAL9IAjDKNGJsB9u5wjnmA7y/LDJNbWGi+b41yUTY1Nb2ymOCKSZGo3GP772hn9y401hFBoiV6h6kqyXzm8//P67etYvhJEUwpi8z46XRf/8s0TzgVIIaTG8sJPcJCICShRCSJGO/E2dStYbDSmVoy4/OmxVNWnayHUlmCPvAfE9n4hq1VpXVxcllJ5ukeUojNCsFApsneXfaoIl7RdLxffGGE2GDRFDpV772ODWdsf7o4NvTVUqe7p7fvnOu7e3tS+GDc9xyBghgSiFMbaRLe9TyuFNWighI6XCdOkAABg7BJ/Jjna0PRyM9kkUQlSrNT/wpZS4tnFfeR/bks0QkZdpRy/LRiGAQOkox3HdmbnZnp5uaWweztngVUw7YVsOE8uJRasjFLBkXHurlbNeYSBDdjopINbC8JH1ff133H18fuGRgcF1rqpGkaucxGhAdITQRgtWCu1W0byF1srGGGOPrGC0e0ze5CuFbRxCElacjwyUuopAY6heq63v77csAVzuqKIVeg1uRR3ckrasrSlDSiFEsViYnVsg5iVOmuUsraXHfFSiRCwFgZRSa12P4yXAYMkYGHsQBdphsKw1MC80Glsd/9qN7UmS1JFd1wEBHYU2bXRCplwqIUNkdOvXzPvDXKXaCoV6GOb+nrVPsxBMBGhnpiOSASEE2buCslqtJIYKQZDGw1zxj3zJoNvaLAoiE2qtsZqb09HCMkTFYrHRaNRqdaWc1HGFEJbnT304i8tCMGDBdVnJvztx/HNv7Ht7YqLgeQKsyo2NMQw2TjAzmPQQDzJkKAMMElAzVKPQno0jGBbC6D/sfWXvxJjvuJ997vkvvnM4cNwMtmTHuwB7Sp2em/21p58arlR8181CthRCSClsSSIN1+nQ+zTpUkrNzc96nus4TpYiiEvTFS1zkJq2VSs7NS9PethgLBBReJ4vHTU1Pd3RvjWOTWZYkQIMxtYJ2UXPPT0/98vf/vbL587EcdLVVv7UDTf+0oMPImtDTMBamxRyMBODMWSIEJCAtTHprGJEiSAEELNEMRfWfn/f3l/y/Z1dXb+79/U9ves/fM0u28LUPOkJ0FPq1Pz8v3/5hds3bd7R1RVpzcxCABFLgYaheVQOMaKx1TgmNMxz8/NdXV1SSiklCgGMINaKiPNoLFa2q6zJqRHtaRNSyra2tvGJCQDOCaMlAoMsYjhSzkXRT3/tq09dOLetd/0j1+z0POc/vPad33j6aVeqhDQz+0raeXfIxGAAWBBprRUKT0oGZCIFEDiOSAtOIBDbgwITdBZK37Nty91Dg1JgKu1C8JVyhGAilMLx3Pa2NqmkQIFC+EopKdNrFll+1ZT7IKKQSlXr1ShOSqVSBltXm37Ja2robB3oddktkVOXBSlRCFEul09NTC0uVjvaS5rSOpZYiuSYuej7f/b6Ky+PDn/i+hv+3WOPd7negYnxH//830zUKgzsChkDvzM1U3LdnsCbTyJJZNgssClIMdWox9qsk8px5KLRswu1nmLQ4xaIGZATrRMyvhC/9tgHi0qSMTViBVxwvEOTk+XAHyyXLQ4yNstDlspZ1AnrpKAcIhIpjAJK6WcSQhKxcpypqSnfdz3PtaIZtE1gF8kwkDlnSrEFWaRhROHSMsEVpOECrU8HfqBc59zIcHfPjTqMUugMrckhSCFCnXzr1MmNpdJnHnpkQ1CYr9fv2LDxP33kI53FAJkXtP4XTz7x4tkz6/zgAzt2PHPq5GceeLDD93/miW89MDj09Lkz/eX2P7j/0WeHz/7nt9+crDf6SqWfv+OuR4c2UaMGgFJgaJKf/soXr+vr/Z0PfOjnv/yFUHOX73zp6Du9xfKvP/aB77tud6KNvRLH83/9ya88dezYbz3+ofu2bF1s1C2PmC0RQUBSShRMZCYnp3r7elKoLcSl13tWRL8IVhYtcXltldmm06f4HxG7urpGR8fjOJFS2BM9oGUsMyA6Uk7X66dmZx/Ycc3W9s65ek1JMVur3ty/oT8oJYZ+56UXvnH65Pb13YXA+4t3Dl6IwrrWhngWzNfOna0Z6i+WTi/M/9ab+4zjfu8119QEfvb1V8crNWWxOwMRDYeNiTBkMhXmb184++zZc7cMbhpPwt9++YUoiQVAEiddxeITx4/9wWuvPrzrmvt37qjFoViK6jEt14Prqanp6SSJ20ptAqUF0XgZpkO0tmevNHRruEC4/Ewl++UEopBSCoEd5bY4Ti6MjLiui9AkjHKhqUSxGEXVMNzS3iHSQ91YoKhHiRR4enbua0ePPLZ9x1985ON/8ZGP371pMwFLEGQMEfe3t//H9z/2czff9o2TxxLSv/vQo7933yO/fu/9E9XFl4bPB46TOYrwpHRQEJEgdqX4rQ9//9c+/Y++b+euI1OTF+ZmPeX4jvvW6OgvP/XE/du2/6uH3x+HUX7iZKaDkGBn0yMIIc+fv9BWLjuOK6WSUqX51zKgtjYFnlhlYsRa4nR6+pJSSjlOe0f7iZOngC9GyKU/su3rzoSE6bwoR8hziwsLYeMj23eVUHYq9cFtO3SmsW+E4d19/dcUS6DN2Xq1MwiOjU/8/wfeujA9WwpKI40agrBNgmin7jEDcERmqK3trv4NMokfGNzUiONqHCklXM/7w9deWazX/t/HPlB2nYRItlDhOYeAiI7jzM8tzM3N9XR326+Z81O81qbuVSVhVxim7aEPQjqOE8dxV2fn8ePHxycm+vv6kiRZYm5mw9TuB+1BcHxmOiECBoNstFFSukLVdOK6XmfgRUlMhG3KUSgswwQo1rluQpQgg1LTUfz/vPoyIgsp6owmFcOnwuamMoghcF1jKNHGk1JKlR55BjQXRyZJRubmb+ntb56qk3VC2oO12JDnucdPnPKDIAh860yXK1ZdYjtjeG9HodpEVthl5ft+W7l8+J2jGzdsgBVH2sRadxeKu9f3PXfy+IHRkVs3bJytVLvb2j735psDHR3dhUJsTCWJXSkTThYajThJbL5rU2liq4Oj/rbSLz58V71ed13Hdd0NflCNQpGN6rQ5UtbADQyU0h9SWTV0Iwwf33X92xNjv/nKSw9u3+FKqZlwxQgjx3EWF6ojoyNbt223npRBDly7aZZ593s5/Y0toyGlcBwlhOjp6RkdGx8dG/N9f1m3NDF7Uj6+fcd8GH3mmadeHRmuk/nasaP/5vnnfufF53p8r933P//OwdkwWkjMN8+cdNx0+p9VbxkiCbijfd1opUpR9PCGgV1t5bm5hQ6piIxd7M2js7IDW7LaSTq4hQwncfLjd931f93/4OvDF/7b22+VCkHrgVt2fycg1/UOvXPELwSlUkkqaUscVzTOYGUMeU8n3TMDIgmBUgqlVOD75Y6ON996e3Bg47LTE4QQlXr9+6+7/snjx75x7vTf//Ln10lnJA4bOrl769btXZ3v37rt84cPzi5UNdOpasVVriE2xJqMJpaooqTx8MDQ10+f+pcvv/i+vg3jtepbI8N/9NgHhrq6EiI7ydpw2idBxNqm4ICAEBvNxCyAlKrU6x+9bvft/S/97ovPP7ZjZ1+hECVJxmwIZnZdb2pm+vSZszt3XiOVVK7FG7j2g/CWHYRycY9e0wloLTHdbiNKKdd1pFR9vb2TUzMnT5/1fY+55SRZZgPgAn/2gx/8+9ftRkOjtWpfofRvH374x26+td4If/q22x8d2nSysjifxD+0a3ePQEeiI0WXlC4zE0XGDHr+v7jjrp5y6ZXx0ZF67VM337KzqyeK9XrXKUmHWXRKWUDSZAKEbqWUlAzgEHSjkAy+lBsLvgBwpfqZu++N6o0vvrnPVYJTkXGaWDnK2b//QLGtWCwFymmJG2ul22DpaV5ZCB2dnM7dfNk8/rVVXpjIJEkchnG9Xq816qOjo41a7RMf/UjayblkuDErgSjE8ZmZxbCxob1joFhcqNU0GQnUYDw9v9DuuF2Omg6jAFEnukraQ6EonXpbcJx5oKlGWHK9TcUyk9YIicBAKF+JCpFA7nS9KpFUqtNxBWJMVDe63fcQZCWJy57romAh5qMIiDp8L88vjDGu65y7MPLU3z2767prym2lQqktCAq+6y5joi+aGSJy2k6wXGxOyw397h5ExhidJHG93qjV67V6/ejRozdcd909d95RrVbz5WO5NENExrhKOY6K47gWRigEkUl0wpoUqsToOEmAWdtJlumYHwAwAJwYo6QsegWtDSEqJYUARygEEFI4SipHIAhHSjs9zhZRlLRrF13HSbS2CNSONdZLx6giis9/6cuFYmlwcCAI/GKx5PmB66hcjrJ6VaXZb5kfittqaPHeT2XICCblOI7ruK7yBjZu3L//7dGxMdd1W2fg2W5IRBEbfebC8PD4uFIinaDPwCgio2NjUMnYGGBI4tgYkkJC1vwupUyMGR4fB4FCYtbtwwyspCRIhZaJMSyyY5aBGYQ2BhCnZmZye8TGJMbknDURFYLCvjferNbrPevXS6kcx1X2Tl5uJlJGaPDSZp8lcfhdoY70MLYljL4QUinXcVzHUeVyua29/PyLL7UUAptVV9dxJicm/voLXzx+/FQYRrVqo1qpSSGTJCZjHOVUK/VKrfbyq6+dOHHi/PnzjiMR7dB1EqCeffq5b37zm8PnzjFzkiREJgojpeRipSIQjdZREruuG4bRsRMnXnz5Zd/zKpVqEBSmp2dfevk76dzClomI9qp8zxsdG99/4OCWzVtcx3Fd13U9KdXaUB1flJJrdWIFV+GR1vWtU3uel5hkw4aNR48e/c5re++9645KtSZEM/oTUxQnrusMDm78wpe/OjMz6yjnht3XHjpypLO9o2td15tvvtXb1zcxPrFl09Do+Nip06c7Ojrrjfrt73vf2NjwuvbyJz/x8XMXhr/4hS/29/dHUTgzO3/trp379r1x5523V6uLtWptYHDg0KF3OtrL9Vqdid85fvyWPXv27t3b0d6hpIwTs+R8B2ZE1MRP/N1TXV1dbW1truu6rquUuiL4nAul32PTfasv88XUB0JKVEo5juu7ru+5g0ND+/a/dfrs+cD38zp/HtEc5cRx0re+99abb77j9ttGRkZvvnnP0Kah117d+8Of/FQhCG6//daBjRtuumlPqVg6eepkHCddHZ1MTIjKdY8eO3rnnbcFxUAbuuOO950+c/b7Hn98enrm/IURzw8OHjry0//sJ26+6aaHHnzo7PkLXZ1dz73w4qc+9cn+/j7DZsUJfxwEwdPPPlerNzZs6HccZespWdp9+fncGUcKuPp8R/kLv/hLV5hQXmYWmVUZkyEpJDG9c/TI9m3bPM8xxiCiMUZKWa3XX/7Oa57jur5bbis5jqrXa6/vezOKws2bNj3z/AtDGzdOT0/PzM52dHV6riOVlFKNT0xce911Bw8eeumll7u7e/YfPECG+np729tKtVq1v3e9o8RiteJ67sb+DU9++6n+vv63DxwqFoJKtXb7bbd864kna/V6WKsNDQ1xxskQUalU2rf/rdf3vrHzmmsKhaAQBL5fcF3PcZSUeNnClZQSUTIT4mr4mAEARyam32VeuOLzmY0hEydJFEWNRlir1BqNxqkzZzwlP/7R7zfGGDIASEYz4Mj4BBOt6+pgZhTy9OnTR44dv/+eexzHHZ+Y7O5eV6tWG2FYLBUr1erLL71y+223zS8u7tixI06SxfmFjRs3jk+Ol4Oi63lKCQRQroNShmEU1usDG/tHx8cHNmyYmZ7p7GyfnpkbHNw4PjZeKBYRodxWbm6AhcK5C+f/5kv/ffu27T3d3X7BKxWKQVB0XddGDgtXYPWpPkopREySJG/tXgEvqNXQvKL5G3kV1TQvlfq2PAwRaENJHIdhWG/UqtV6vV4/duzoxv6+D33gsXqjYcfmGGM8z2WmRiMkAGYOw0gnceAX6o1IOCqOYymQmLUx9Vp9bm5+Y38/MyQmkVL6rhfHifJcew6TPeHCdjo60vGUIjK+7yZx7Hs+A3qeE0WR67i2JcsYY63se9784sJffO7z3d09AwMDvu+XikEQFD3Pc13HHn+4elMKIoC1sn1S68ROG1shgKbLt7/hleiYUt4833CzwVClUun46ZOLi4vX7NgRR5F9cRwliTGMYLQ2hpRylJRhlBAKbRIiE+tEkyYiR7rlcjlOEqsRZWZtDy9KOY1sIIjtlrFnnKI0zEIKO3zPson5uEZrZdd1G2H015//QqFYGhwc9DyvUCj4fuB5ruO4tkB+UQMsc750xK0x2Uy3i2MSdaVjxS5h/fQg6Ez/aOcV2YaGa7bvPHjkqJTqwXvvrlZrDCykSOwYOSGBjW3hAyHYGAuGJQs7rDzRSb6L2ll6QAzCNkmn0oCMSBYyremxYGFF8k3RQSY+McZ4rhslyee+8AVAOTQ05Lpu4Pu+57muawkyXNvY4kwjCCaF5KsaU73Hc81WkZuiUoqIiHwiIDLMxV07t7194CAbc/9999bqNW1nXyEYTciIKBM2RNpiLsNAhHawsBBpiMpzHyHsaHCmdHACsrBjHjAtjDMAsDEshJAps022B0Br7ft+rVH/my9+WWuzc+dO13ED3/d933Ut2HCWTS64tJ/ZTf6ytXB1lYzbpKnys97sYYC5vgtKcM3OnYfeORJG4YMP3M/McRwLlAIhMUYzILAATDhTg7UM0FqmwcWsVgmIxma3zJLZNpSmLUBgD0lmIhZCYHr0AxWLpamp6S995cvCUTt2bPc8Lwh8z/cyK8tLH6dycZSVydtzBHsJQ7+nc+SWzeW12hmlBLN0XTdNC5kZYMfOnSdPnZxf/Nv3P/yI73m1eh1BCCFQazKGmzMJbRMV53WNJTeSiZvz4u3ByMSMRKQBUMh0gAExAUhh+TRCgrZS27GTJ7/xxJPt7eXNm4Y8z/f9IPB9z/OzDAXxXR6pZ2clcN6DtPzX7xreXc70xsq6tNZxHIdRFIVhvV4Pw7DWqJ85c4qJH7z//o39/dVqzRDZBp70wPUUitsJRqZlZkOuqkYJAjIJgH1GCCGFSqW4yCiFRCkFSgEM4HqekvI733n1O3v3DQ4O9ff3ea4XBEHg+74feL7nOI5SSghA2yX5LhHvRV2WrlrouFgwkQAspdW6Z7Pj7CxKxO3bto+OjH3jW0/etPu6PTfdJIlrYSMnTlonP2LeKt9axic7liAliJrTcawTWwm8PcaDGVgWioWp6am/e+bZiamJnTt2dnR2ep4b+DYy+2keqBQKgfgedyxcTb6kWqwurm68trUhKe3x00RAjIRIdrsaHBwslUqHjxw7d+HCbbfe2t/XX4/CJEpaQkTOXlJLREolRemIgkwOaYtqAISQcnrMLJj8oJBo88qrr+19441isXj97usLQdF1/MD3fN/3fM/1POUq6QiZZoBX64xqapWVXmWP5lys2sLrAbBUklFlgo/s0AnEdes6g8AfGR154um/GxwY2H399R3tXUkcxbFuOW0rP7uKc9kVQ95WtETQn81jRyGE7/lszOFjR/a9sb9WrQ4ODq5bt871XNd1PS/1ZM/zHMexDB1cPRtnVl7qf6OTUy20E34Xogilp6sZnSRJEidRFMdxFEVxFDeiKInjaH5hfmR0LGyEgwODO7Zv6+zssJhEJ5qXV9mWNEss0b4IIaVwXc91nSiKzp47d/DQofn5+d6e9X19fUEQWGbR8zzX9Tzf9VzHcVyplD3sVKCA74qhRV5hmWJujeJX3dY2K7V7XaK1iWOdJHEcx1EchmEcx2GSJHGYzC/MT01NhWFYbi9t3DjQ09NdLJSEkHaTtNL0nAwSKOzJh1JKqZSjlBAiSZL5+bnz58+dO3+hXg+7ujr7ensLhYLjupZi9jzPTR9285NCONAyh+qSHVJXzdCrpdZXC4ekFtPaaJ3EcRInUZw6eKyT9FGpVmZnZ+YrC8BcLJS6Oro6uzpLxZLvu0rlks7UBYlIa11vNObn56enp+fn5xv1uuuqzq6uzs51QRA4SjmO46REfmpgSxgpZd9qGaFB71mFsYqhRyYmV9k3+WKmX/t1LNtdkcFOAWVjyMI+a9k4jvM/tdaJ1jpJ4jiq1CuVxWq9XtdaA1tFg5DStZCOmY3W2mitbfMWeL5fbmsrl9uCIHBdTykllXCU62QPa+XUk6Vc2nlHa6Dp6WLi0NxifKWZIa/5mYvektVextiqy8Mlzd9KSaVEksgkMSpJtON4nlsMCt0dPZrysB4nOjLGGEOALAQ6ylVu0XUCz0tNaGOBkNJqeqRyHKUcp2lfm/utoW6y8lwUvqjkYo0q9LWjDl7lR74kkOTl5Hf23bJENzV0S6TVjuNora2jOsYYUuQFxZId55yeuAStfV52V8T8ffJ3U8pxlJKOch2lpJJKOVKKfGrFJW20cqAdr/6CNUHv96S9W+UjlzBYK5vqMjLEzsdo7dLQUurcysYYYzTZIzQN8dKDDfJyBiMIARJldr9SK0tlF4pypJLKyRShywZrrGWCHb8LgnPl438AaDFuLhHTy5IAAAAASUVORK5CYII=" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" />CareLink</span>
+      <span class="bell-wrap" id="bellIcon">🔔<span class="bell-badge hidden" id="bellBadge">0</span></span>
+    </div>
+
+    <div style="flex:1; overflow-y:auto;">
+
+      <!-- ---- Talk tab ---- -->
+      <div id="pane-talk" class="tab-pane content-pad">
+        <div class="talk-center">
+          <img src="data:image/png;base64,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" alt="CareLink" style="width:100px;height:100px;border-radius:50%;object-fit:cover;margin:0 auto 0.6rem;display:block;box-shadow:0 4px 12px rgba(0,0,0,.15);" />
+          <h2>CareLink</h2>
+          <p class="subtitle">Your caring AI companion</p>
+          <button class="speaker-btn" id="replayBtn">🔊</button>
+          <div class="greeting-card">
+            <strong id="greetingTitle">Namaste! 🙏</strong>
+            <p class="subtitle" id="greetingSub">I'm here to help you. Press the big button and talk to me!</p>
+          </div>
+          <button id="voiceBtn">🎤</button>
+          <div id="transcript"></div>
+        </div>
+      </div>
+
+      <!-- ---- Calendar tab ---- -->
+      <div id="pane-calendar" class="tab-pane content-pad hidden">
+        <div class="cal-header">
+          <div>
+            <h2>Calendar</h2>
+            <p class="subtitle" style="margin:0;">Schedule &amp; appointments</p>
+          </div>
+          <button class="fab" id="calAddBtn">+</button>
+        </div>
+        <div class="cal-card">
+          <div class="cal-nav">
+            <button id="calPrev">‹</button>
+            <span id="calMonthLabel">Month Year</span>
+            <button id="calNext">›</button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+        </div>
+        <div class="agenda-heading">🕐 <span id="agendaDateLabel"></span></div>
+        <div id="agendaList"></div>
+      </div>
+
+      <!-- ---- Reminders tab ---- -->
+      <div id="pane-reminders" class="tab-pane content-pad hidden">
+        <div class="cal-header">
+          <div>
+            <h2>Reminders</h2>
+            <p class="subtitle" style="margin:0;">Medicine, appointments &amp; more</p>
+          </div>
+          <button class="fab" id="remAddBtn">+</button>
+        </div>
+        <div id="reminderFullList"></div>
+      </div>
+
+      <!-- ---- Family tab ---- -->
+      <div id="pane-family" class="tab-pane content-pad hidden">
+        <h2>Family Group</h2>
+        <div id="familyNoGroup">
+          <p class="subtitle">You're not in a family group yet.</p>
+          <input type="text" id="groupName" placeholder="Group Name (e.g. Arora Family)" />
+          <button id="createGroupBtn">Create Group</button>
+          <hr style="border:none;border-top:1px solid var(--border);margin:1rem 0;" />
+          <p class="subtitle">Already have an invite code?</p>
+          <input type="text" id="inviteCode" placeholder="Invite Code (e.g. AB12CD)" />
+          <button class="secondary" id="joinGroupBtn">Join Group</button>
+        </div>
+        <div id="familyHasGroup" class="hidden">
+          <div class="invite-box">
+            <div style="font-size:1rem;"><strong id="familyGroupName"></strong></div>
+            <div style="margin-top:0.5rem;font-size:0.85rem;">Invite code: <strong id="familyInviteCode" style="letter-spacing:2px;"></strong></div>
+            <p style="font-size:0.78rem;color:var(--text-muted);margin:0.4rem 0 0.6rem;">Share this code (or the link below) with family members so they can join.</p>
+            <button class="secondary" id="copyInviteLinkBtn">📋 Copy Invite Link</button>
+            <button class="secondary" id="addMemberManualBtn" style="margin-top:0.4rem;">➕ Add Member by Email</button>
+          </div>
+          <h3 style="margin-top:1.2rem;">Members</h3>
+          <div id="memberList" style="max-height:260px;overflow-y:auto;"></div>
+          <button class="danger" id="leaveGroupBtn" style="margin-top:1rem;">Leave Group</button>
+        </div>
+      </div>
+
+      <!-- ---- Emergency tab ---- -->
+      <div id="pane-emergency" class="tab-pane content-pad hidden">
+        <h2>Emergency</h2>
+        <p class="subtitle">Alerts your family group instantly with time, location &amp; notes.</p>
+        <div style="text-align:center;">
+          <button class="sos-btn" id="sosBtn">SOS</button>
+          <p class="hint-text">Tap if this is urgent — or just speak in the Talk tab and CareLink will detect it automatically.</p>
+        </div>
+        <h3>Recent Emergency Alerts</h3>
+        <div id="emergencyList" style="max-height:340px;overflow-y:auto;"></div>
+      </div>
+
+      <!-- ---- Activity tab ---- -->
+      <div id="pane-activity" class="tab-pane content-pad hidden">
+        <h2>Activity</h2>
+        <p class="subtitle" style="margin-top:0;">Recent conversations &amp; events</p>
+        <div id="activityList" style="max-height:calc(100vh - 220px);overflow-y:auto;"></div>
+      </div>
+
+      <!-- ---- Settings tab ---- -->
+      <div id="pane-settings" class="tab-pane content-pad hidden">
+        <h2>Settings</h2>
+        <p class="subtitle" style="margin-top:0;">Customize your experience</p>
+
+        <div class="settings-card">
+          <div class="settings-row-title"><span class="icon-circle">🌐</span> Language</div>
+          <select id="languageSelect">
+            <option value="auto">Auto-detect</option>
+            <option value="en-US">English</option>
+            <option value="hi-IN">Hindi</option>
+            <option value="hinglish">Hinglish (Mix)</option>
+          </select>
+        </div>
+
+        <div class="settings-card">
+          <div class="toggle-line">
+            <div class="settings-row-title" style="margin-bottom:0;"><span class="icon-circle">🔊</span> Voice Response</div>
+            <label class="switch">
+              <input type="checkbox" id="voiceRespToggle" checked>
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+          <div style="margin-top:0.8rem;">
+            <div class="toggle-line"><span class="hint-text">Speaking Speed</span><span class="hint-text" id="speedLabel">100%</span></div>
+            <input type="range" id="speedSlider" min="50" max="150" value="100" />
+            <div class="toggle-line"><span class="hint-text">Slow</span><span class="hint-text">Fast</span></div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-row-title"><span class="icon-circle">✉️</span> Caregiver Email</div>
+          <p class="hint-text" style="margin-top:-0.3rem;">Emergency alerts will reference this email address.</p>
+          <input type="email" id="caregiverEmail" placeholder="caregiver@example.com" />
+          <button id="saveEmailBtn">Save</button>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-row-title"><span class="icon-circle">ℹ️</span> About CareLink</div>
+          <div class="about-box">
+            <div class="avatar">❤️</div>
+            <div>
+              <strong>CareLink v1.0</strong>
+              <p class="hint-text" style="margin:0.1rem 0 0;">AI Voice Companion for Elderly Parents</p>
+            </div>
+          </div>
+        </div>
+
+        <button class="danger" id="logoutBtn">Log Out</button>
+      </div>
+
+    </div>
+
+    <div class="bottom-nav">
+      <button class="nav-item nav-active" data-tab="talk"><span class="nav-icon">🎤</span>Talk</button>
+      <button class="nav-item" data-tab="calendar"><span class="nav-icon">📅</span>Calendar</button>
+      <button class="nav-item" data-tab="reminders"><span class="nav-icon">🔔</span>Reminders</button>
+      <button class="nav-item" data-tab="family"><span class="nav-icon">👪</span>Family</button>
+      <button class="nav-item" data-tab="emergency"><span class="nav-icon">📞</span>Emergency</button>
+      <button class="nav-item" data-tab="activity"><span class="nav-icon">🕘</span>Activity</button>
+      <button class="nav-item" data-tab="settings"><span class="nav-icon">⚙️</span>Settings</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================
+   CONFIG — replace with your real Groq key if it changes
+   ========================================================= */
+const GROQ_API_KEY = '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';
+const GROQ_MODEL = 'openai/gpt-oss-20b';
+
+/* =========================================================
+   Storage helpers
+   ========================================================= */
+function loadJSON(key, fallback) {
+  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+  catch (e) { return fallback; }
+}
+function saveJSON(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
+
+let currentUser = null;
+let currentGroup = null;
+
+/* =========================================================
+   Screen navigation (splash / register / info / main)
+   ========================================================= */
+const screens = {
+  splash: document.getElementById('splash'),
+  register: document.getElementById('register'),
+  info: document.getElementById('info'),
+  main: document.getElementById('main')
+};
+function showScreen(id) {
+  Object.values(screens).forEach(s => s.classList.add('hidden'));
+  screens[id].classList.remove('hidden');
+}
+
+document.getElementById('getStarted').onclick = () => showScreen('register');
+document.getElementById('backFromRegister').onclick = () => showScreen('splash');
+document.getElementById('learnMoreBtn').onclick = () => showScreen('info');
+document.getElementById('backFromInfo').onclick = () => showScreen('splash');
+
+/* =========================================================
+   Sign in / Register
+   ========================================================= */
+document.getElementById('signIn').onclick = () => {
+  const email = prompt('Enter your email');
+  if (!email) return;
+  const users = loadJSON('carelink_users', {});
+  const account = users[email.trim().toLowerCase()];
+  if (!account) { alert('No account found for that email. Please register.'); return; }
+  const pwd = prompt('Enter your password');
+  if (pwd !== account.pwd) { alert('Incorrect password.'); return; }
+  logInAs(account);
+};
+
+document.getElementById('registerBtn').onclick = () => {
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  const pwd = document.getElementById('pwd').value;
+  const role = document.getElementById('role').value;
+  if (!name || !email || !pwd) { alert('All fields required'); return; }
+  const users = loadJSON('carelink_users', {});
+  if (users[email]) { alert('An account with that email already exists. Please sign in instead.'); return; }
+  const account = { name, email, pwd, role, groupCode: null };
+  users[email] = account;
+  saveJSON('carelink_users', users);
+  logInAs(account);
+};
+
+function logInAs(account) {
+  currentUser = { name: account.name, email: account.email, role: account.role };
+  saveJSON('currentUser', currentUser);
+  currentGroup = loadJSON('carelink_groups', {})[account.groupCode] || null;
+  if (currentGroup) saveJSON('currentGroup', currentGroup); else localStorage.removeItem('currentGroup');
+  enterApp();
+}
+
+function enterApp() {
+  showScreen('main');
+  applySettingsToUI();
+  renderFamilyTab();
+  renderReminderTabs();
+  renderActivityAndEmergency();
+  startReminderWatcher();
+}
+
+document.getElementById('logoutBtn').onclick = () => {
+  localStorage.removeItem('currentUser');
+  localStorage.removeItem('currentGroup');
+  currentUser = null;
+  currentGroup = null;
+  showScreen('splash');
+};
+
+window.addEventListener('load', () => {
+  applyInviteFromURL();
+  const storedUser = loadJSON('currentUser', null);
+  if (storedUser) {
+    currentUser = storedUser;
+    currentGroup = loadJSON('currentGroup', null);
+    enterApp();
+  }
+});
+
+/* =========================================================
+   Family group (mock backend via localStorage)
+   ========================================================= */
+function buildInviteLink(code) {
+  const url = new URL(window.location.href);
+  url.search = '';
+  url.searchParams.set('invite', code);
+  return url.toString();
+}
+function applyInviteFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const invite = params.get('invite');
+  if (!invite) return;
+  const code = invite.toUpperCase();
+  // Pre-fill the field for unauthenticated users
+  const field = document.getElementById('inviteCode');
+  if (field) field.value = code;
+  // If already logged in and not in a group, auto-join
+  if (currentUser && !currentGroup) {
+    const groups = loadJSON('carelink_groups', {});
+    const group = groups[code];
+    if (group) {
+      if (currentUser.email && !group.members.includes(currentUser.email)) {
+        group.members.push(currentUser.email);
+        groups[code] = group;
+        saveJSON('carelink_groups', groups);
+      }
+      currentGroup = group;
+      saveJSON('currentGroup', currentGroup);
+      linkUserToGroup(code);
+      renderFamilyTab();
+      alert(`You've joined the group: ${group.name}`);
+    }
+  }
+}
+function linkUserToGroup(code) {
+  if (!currentUser?.email) return;
+  const users = loadJSON('carelink_users', {});
+  if (users[currentUser.email]) { users[currentUser.email].groupCode = code; saveJSON('carelink_users', users); }
+}
+
+document.getElementById('createGroupBtn').onclick = () => {
+  const groupName = document.getElementById('groupName').value.trim();
+  if (!groupName) { alert('Group name required'); return; }
+  const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+  currentGroup = { id: 'family-' + Date.now(), name: groupName, inviteCode: code, members: [currentUser?.email].filter(Boolean) };
+  const groups = loadJSON('carelink_groups', {});
+  groups[code] = currentGroup;
+  saveJSON('carelink_groups', groups);
+  saveJSON('currentGroup', currentGroup);
+  linkUserToGroup(code);
+
+  const inviteLink = buildInviteLink(code);
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(inviteLink).catch(() => {});
+    alert(`Group created!\n\nInvite code: ${code}\nInvite link (copied to clipboard):\n${inviteLink}`);
+  } else {
+    alert(`Group created!\n\nInvite code: ${code}\nInvite link:\n${inviteLink}`);
+  }
+  renderFamilyTab();
+  renderReminderTabs();
+  renderActivityAndEmergency();
+};
+
+document.getElementById('joinGroupBtn').onclick = () => {
+  const code = document.getElementById('inviteCode').value.trim().toUpperCase();
+  if (!code) { alert('Enter invite code'); return; }
+  const groups = loadJSON('carelink_groups', {});
+  const group = groups[code];
+  if (!group) {
+    alert('That invite code was not found on this device. Groups created on a different device/browser will not be visible here since this demo has no real backend.');
+    return;
+  }
+  if (currentUser?.email && !group.members.includes(currentUser.email)) {
+    group.members.push(currentUser.email);
+    groups[code] = group;
+    saveJSON('carelink_groups', groups);
+  }
+  currentGroup = group;
+  saveJSON('currentGroup', currentGroup);
+  linkUserToGroup(code);
+  renderFamilyTab();
+  renderReminderTabs();
+  renderActivityAndEmergency();
+};
+
+document.getElementById('copyInviteLinkBtn').onclick = () => {
+  if (!currentGroup) return;
+  const link = buildInviteLink(currentGroup.inviteCode);
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(link).catch(() => {});
+    alert('Invite link copied to clipboard:\n' + link);
+  } else {
+    prompt('Copy this invite link:', link);
+  }
+};
+
+document.getElementById('addMemberManualBtn').onclick = () => {
+  const email = prompt('Enter the email address of the person to add:');
+  if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+  const emailLower = email.trim().toLowerCase();
+
+  if (!currentGroup) return;
+  const groups = loadJSON('carelink_groups', {});
+  const group = groups[currentGroup.inviteCode];
+  if (!group) return;
+
+  if (group.members.includes(emailLower)) {
+    alert(`${emailLower} is already in this group.`);
+    return;
+  }
+
+  // Add them to the group members list (they'll see the group when they sign in with that email)
+  group.members.push(emailLower);
+  groups[currentGroup.inviteCode] = group;
+  saveJSON('carelink_groups', groups);
+  currentGroup = group;
+  saveJSON('currentGroup', currentGroup);
+
+  // If they already have an account on this device, link them
+  const users = loadJSON('carelink_users', {});
+  if (users[emailLower]) {
+    users[emailLower].groupCode = currentGroup.inviteCode;
+    saveJSON('carelink_users', users);
+  }
+  renderFamilyTab();
+  alert(`${emailLower} added to the group! They'll see this group when they sign in with that email.`);
+};
+
+document.getElementById('leaveGroupBtn').onclick = () => {
+  if (!confirm('Leave this family group?')) return;
+  if (currentUser?.email && currentGroup) {
+    const groups = loadJSON('carelink_groups', {});
+    const group = groups[currentGroup.inviteCode];
+    if (group) {
+      group.members = group.members.filter(m => m !== currentUser.email);
+      groups[currentGroup.inviteCode] = group;
+      saveJSON('carelink_groups', groups);
+    }
+    const users = loadJSON('carelink_users', {});
+    if (users[currentUser.email]) { users[currentUser.email].groupCode = null; saveJSON('carelink_users', users); }
+  }
+  currentGroup = null;
+  localStorage.removeItem('currentGroup');
+  renderFamilyTab();
+};
+
+function renderFamilyTab() {
+  const hasGroup = !!currentGroup;
+  document.getElementById('familyNoGroup').classList.toggle('hidden', hasGroup);
+  document.getElementById('familyHasGroup').classList.toggle('hidden', !hasGroup);
+  if (!hasGroup) return;
+  document.getElementById('familyGroupName').textContent = currentGroup.name;
+  document.getElementById('familyInviteCode').textContent = currentGroup.inviteCode;
+  const users = loadJSON('carelink_users', {});
+  const list = document.getElementById('memberList');
+  const members = currentGroup.members || [];
+  if (members.length === 0) { list.innerHTML = '<p class="empty-note">No members yet.</p>'; return; }
+  list.innerHTML = members.map(email => {
+    const u = users[email];
+    const name = u ? u.name : null;
+    const initial = (name || email).charAt(0).toUpperCase();
+    const isYou = email === currentUser?.email;
+    return `<div class="member-row">
+      <div class="member-dot">${initial}</div>
+      <div style="flex:1;">
+        <strong>${escapeHtml(name || email)}</strong>${isYou ? ' <span style="font-size:0.7rem;color:var(--primary);">(you)</span>' : ''}
+        ${name ? `<div class="hint-text">${escapeHtml(email)}</div>` : '<div class="hint-text">Invited — not yet registered</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* =========================================================
+   Tab navigation inside main app
+   ========================================================= */
+const tabIds = ['talk','calendar','reminders','family','emergency','activity','settings'];
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.onclick = () => switchTab(btn.getAttribute('data-tab'));
+});
+document.getElementById('bellIcon').onclick = () => switchTab('activity');
+
+function switchTab(tab) {
+  tabIds.forEach(t => {
+    document.getElementById('pane-' + t).classList.toggle('hidden', t !== tab);
+  });
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.classList.toggle('nav-active', btn.getAttribute('data-tab') === tab);
+  });
+  if (tab === 'calendar') renderCalendar();
+  if (tab === 'reminders') renderReminderTabs();
+  if (tab === 'activity' || tab === 'emergency') renderActivityAndEmergency();
+  if (tab === 'family') renderFamilyTab();
+}
+
+/* =========================================================
+   Group-scoped storage keys
+   ========================================================= */
+function groupScopedKey(base) {
+  const scope = currentGroup?.id || 'personal-' + (currentUser?.email || 'guest');
+  return `${base}:${scope}`;
+}
+
+/* =========================================================
+   Reminders (shared model powers Calendar + Reminders tabs)
+   ========================================================= */
+function categorizeReminder(text) {
+  const t = text.toLowerCase();
+  if (/medic|tablet|pill|dose|sugar|insulin/.test(t)) return { icon: '💊', cls: 'pink' };
+  if (/walk|exercise|yoga|gym|stretch/.test(t)) return { icon: '🚶', cls: 'green' };
+  return { icon: '📅', cls: 'blue' };
+}
+
+function addReminder({ text, frequency, dateTimeISO, timeOfDay }) {
+  const key = groupScopedKey('carelink_reminders');
+  const reminders = loadJSON(key, []);
+  reminders.push({
+    id: 'r-' + Date.now() + Math.random().toString(36).slice(2, 6),
+    text,
+    frequency: frequency || 'once',
+    time: frequency === 'daily' ? (timeOfDay || '09:00') : (dateTimeISO || ''),
+    enabled: true,
+    done: false,
+    notifiedDue: false,
+    createdAt: new Date().toISOString()
+  });
+  saveJSON(key, reminders);
+  renderReminderTabs();
+}
+
+function getReminders() { return loadJSON(groupScopedKey('carelink_reminders'), []); }
+function saveReminders(list) { saveJSON(groupScopedKey('carelink_reminders'), list); }
+
+function renderReminderTabs() {
+  renderReminderFullList();
+  renderCalendar();
+}
+
+function renderReminderFullList() {
+  const list = document.getElementById('reminderFullList');
+  const reminders = getReminders().slice().sort((a, b) => a.time.localeCompare(b.time));
+  if (reminders.length === 0) {
+    list.innerHTML = '<p class="empty-note">No reminders yet. Tap + to add one, or ask CareLink out loud.</p>';
+    return;
+  }
+  list.innerHTML = reminders.map(r => {
+    const cat = categorizeReminder(r.text);
+    const timeLabel = r.frequency === 'daily' ? r.time : (r.time ? new Date(r.time).toLocaleString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' }) : 'No time');
+    return `
+      <div class="list-item">
+        <div class="icon-sq ${cat.cls}">${cat.icon}</div>
+        <div class="li-body">
+          <div class="li-title">${escapeHtml(r.text)}</div>
+          <div class="li-meta">🕐 ${timeLabel} · <span class="freq">${r.frequency}</span></div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" data-id="${r.id}" class="rem-toggle" ${r.enabled ? 'checked' : ''}>
+          <span class="slider-toggle"></span>
+        </label>
+        <button class="trash-btn" data-id="${r.id}" title="Delete">🗑️</button>
+      </div>`;
+  }).join('');
+
+  list.querySelectorAll('.rem-toggle').forEach(el => {
+    el.onchange = () => {
+      const items = getReminders();
+      const target = items.find(r => r.id === el.getAttribute('data-id'));
+      if (target) target.enabled = el.checked;
+      saveReminders(items);
+    };
+  });
+  list.querySelectorAll('.trash-btn').forEach(el => {
+    el.onclick = () => {
+      const id = el.getAttribute('data-id');
+      saveReminders(getReminders().filter(r => r.id !== id));
+      renderReminderTabs();
+    };
+  });
+}
+
+document.getElementById('remAddBtn').onclick = () => promptAddReminder();
+document.getElementById('calAddBtn').onclick = () => promptAddReminder();
+
+function promptAddReminder() {
+  const text = prompt('Reminder text (e.g. Take medicine):');
+  if (!text) return;
+  const freq = (prompt('Frequency — type "once" or "daily":', 'daily') || 'daily').toLowerCase() === 'once' ? 'once' : 'daily';
+  if (freq === 'daily') {
+    const time = prompt('What time each day? (HH:MM, 24-hour)', '09:00') || '09:00';
+    addReminder({ text, frequency: 'daily', timeOfDay: time });
+  } else {
+    const dateStr = prompt('Date (YYYY-MM-DD):', new Date().toISOString().slice(0, 10));
+    const time = prompt('Time (HH:MM, 24-hour):', '09:00');
+    if (!dateStr || !time) return;
+    addReminder({ text, frequency: 'once', dateTimeISO: new Date(`${dateStr}T${time}`).toISOString() });
+  }
+}
+
+/* Reminder due-time watcher -> pushes notifications */
+function startReminderWatcher() {
+  checkDueReminders();
+  if (!window.__carelinkWatcherStarted) {
+    window.__carelinkWatcherStarted = true;
+    setInterval(checkDueReminders, 30000);
+  }
+}
+function checkDueReminders() {
+  const reminders = getReminders();
+  const now = new Date();
+  let changed = false;
+  reminders.forEach(r => {
+    if (!r.enabled || r.done) return;
+    if (r.frequency === 'once') {
+      if (!r.notifiedDue && r.time && new Date(r.time).getTime() <= now.getTime()) {
+        addNotification('task', `⏰ Reminder due: ${r.text}`, r.text);
+        r.notifiedDue = true;
+        changed = true;
+      }
+    } else {
+      // daily: notify once per calendar day at/after the time-of-day
+      const [hh, mm] = r.time.split(':').map(Number);
+      const today = now.toISOString().slice(0, 10);
+      const dueToday = new Date(now); dueToday.setHours(hh, mm, 0, 0);
+      if (now.getTime() >= dueToday.getTime() && r.lastNotifiedDate !== today) {
+        addNotification('task', `⏰ Reminder due: ${r.text}`, r.text);
+        r.lastNotifiedDate = today;
+        changed = true;
+      }
+    }
+  });
+  if (changed) saveReminders(reminders);
+}
+
+/* =========================================================
+   Calendar tab
+   ========================================================= */
+let calViewDate = new Date();
+let calSelectedDate = new Date();
+
+document.getElementById('calPrev').onclick = () => { calViewDate.setMonth(calViewDate.getMonth() - 1); renderCalendar(); };
+document.getElementById('calNext').onclick = () => { calViewDate.setMonth(calViewDate.getMonth() + 1); renderCalendar(); };
+
+function renderCalendar() {
+  const grid = document.getElementById('calGrid');
+  const y = calViewDate.getFullYear(), m = calViewDate.getMonth();
+  document.getElementById('calMonthLabel').textContent = calViewDate.toLocaleString([], { month: 'long', year: 'numeric' });
+
+  const firstDow = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const daysInPrevMonth = new Date(y, m, 0).getDate();
+  const today = new Date();
+
+  let cells = ['SU','MO','TU','WE','TH','FR','SA'].map(d => `<div class="dow">${d}</div>`).join('');
+
+  for (let i = 0; i < firstDow; i++) {
+    cells += `<div class="day muted">${daysInPrevMonth - firstDow + i + 1}</div>`;
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = d === today.getDate() && m === today.getMonth() && y === today.getFullYear();
+    const isSelected = d === calSelectedDate.getDate() && m === calSelectedDate.getMonth() && y === calSelectedDate.getFullYear();
+    cells += `<div class="day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}" data-day="${d}">${d}</div>`;
+  }
+  const remainder = (7 - (cells.split('day').length - 1) % 7) % 7;
+  for (let i = 1; i <= remainder; i++) cells += `<div class="day muted">${i}</div>`;
+
+  grid.innerHTML = cells;
+  grid.querySelectorAll('.day[data-day]').forEach(el => {
+    el.onclick = () => { calSelectedDate = new Date(y, m, Number(el.getAttribute('data-day'))); renderCalendar(); };
+  });
+
+  renderAgenda();
+}
+
+function renderAgenda() {
+  document.getElementById('agendaDateLabel').textContent = calSelectedDate.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+  const dateStr = calSelectedDate.toISOString().slice(0, 10);
+  const reminders = getReminders().filter(r => {
+    if (r.frequency === 'daily') return true;
+    return r.time && r.time.slice(0, 10) === dateStr;
+  }).sort((a, b) => {
+    const at = a.frequency === 'daily' ? a.time : a.time.slice(11, 16);
+    const bt = b.frequency === 'daily' ? b.time : b.time.slice(11, 16);
+    return at.localeCompare(bt);
+  });
+
+  const list = document.getElementById('agendaList');
+  if (reminders.length === 0) {
+    list.innerHTML = '<p class="empty-note">Nothing scheduled for this day.</p>';
+    return;
+  }
+  list.innerHTML = reminders.map(r => {
+    const cat = categorizeReminder(r.text);
+    const timeLabel = r.frequency === 'daily' ? r.time : new Date(r.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return `
+      <div class="list-item">
+        <div class="icon-sq ${cat.cls}">${cat.icon}</div>
+        <div class="li-body">
+          <div class="li-title">${escapeHtml(r.text)}</div>
+          <div class="li-meta">🕐 ${timeLabel} · <span class="freq">${r.frequency}</span></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* =========================================================
+   Notifications / Activity / Emergency
+   ========================================================= */
+function addNotification(type, message, quoted) {
+  const key = groupScopedKey('carelink_notifications');
+  const notifs = loadJSON(key, []);
+  notifs.unshift({
+    id: 'n-' + Date.now() + Math.random().toString(36).slice(2, 6),
+    type, message, quoted: quoted || '',
+    timestamp: new Date().toISOString(),
+    read: false
+  });
+  saveJSON(key, notifs.slice(0, 100));
+  renderActivityAndEmergency();
+}
+
+function getNotifications() { return loadJSON(groupScopedKey('carelink_notifications'), []); }
+
+function relativeTime(iso) {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.round(diffMs / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return `${hrs} hour${hrs !== 1 ? 's' : ''} ago`;
+  const days = Math.round(hrs / 24);
+  return `${days} day${days !== 1 ? 's' : ''} ago`;
+}
+
+function renderActivityAndEmergency() {
+  const notifs = getNotifications();
+  const unread = notifs.filter(n => !n.read).length;
+  document.getElementById('bellBadge').textContent = unread;
+  document.getElementById('bellBadge').classList.toggle('hidden', unread === 0);
+
+  const activityList = document.getElementById('activityList');
+  activityList.innerHTML = notifs.length === 0
+    ? '<p class="empty-note">No activity yet.</p>'
+    : notifs.map(n => renderActivityRow(n)).join('');
+
+  const emergencyList = document.getElementById('emergencyList');
+  const emergencies = notifs.filter(n => n.type === 'emergency');
+  emergencyList.innerHTML = emergencies.length === 0
+    ? '<p class="empty-note">No emergency alerts.</p>'
+    : emergencies.map(n => renderActivityRow(n)).join('');
+}
+
+function renderActivityRow(n) {
+  const cat = n.type === 'emergency' ? { icon: '⚠️', cls: 'pink' } :
+              n.type === 'task' ? { icon: '🔔', cls: 'blue' } :
+              n.type === 'completed' ? { icon: '✅', cls: 'green' } : { icon: '💬', cls: 'blue' };
+  return `
+    <div class="list-item ${n.type === 'emergency' ? 'emergency' : ''}">
+      <div class="icon-sq ${cat.cls}">${cat.icon}</div>
+      <div class="act-row">
+        <div class="act-top">
+          <span class="badge-pill ${n.type}">${n.type}</span>
+          <span class="act-time">${relativeTime(n.timestamp)}</span>
+        </div>
+        <div class="act-msg">${escapeHtml(n.message)}</div>
+        ${n.quoted ? `<div class="act-quote">"${escapeHtml(n.quoted)}"</div>` : ''}
+      </div>
+    </div>`;
+}
+
+/* Mark all read when opening Activity/bell */
+function markAllRead() {
+  const key = groupScopedKey('carelink_notifications');
+  const notifs = loadJSON(key, []).map(n => ({ ...n, read: true }));
+  saveJSON(key, notifs);
+  renderActivityAndEmergency();
+}
+
+/* =========================================================
+   Emergency (manual SOS + AI-detected)
+   ========================================================= */
+document.getElementById('sosBtn').onclick = async () => {
+  if (!confirm('Send an emergency alert to your family group now?')) return;
+  await raiseEmergencyAlert('Manual SOS button pressed');
+};
+
+async function raiseEmergencyAlert(spoken) {
+  const time = new Date().toLocaleString();
+  const location = await getLocationLabel();
+  const settings = getSettings();
+  const emailNote = settings.caregiverEmail ? ` | Caregiver email on file: ${settings.caregiverEmail}` : '';
+  const message = `⚠️ Emergency — Time: ${time} | Location: ${location}${emailNote}`;
+  addNotification('emergency', message, spoken);
+  alert('⚠️ This has been logged as an emergency and sent to the family group notifications.');
+}
+
+function getLocationLabel() {
+  return new Promise((resolve) => {
+    if (!('geolocation' in navigator)) { resolve('unavailable (no location support)'); return; }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve(`${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`),
+      () => resolve('unavailable (permission denied)'),
+      { timeout: 4000 }
+    );
+  });
+}
+
+/* =========================================================
+   Settings
+   ========================================================= */
+function getSettings() {
+  return loadJSON('carelink_settings', { language: 'auto', voiceResponse: true, speedPercent: 100, caregiverEmail: '' });
+}
+function saveSettings(s) { saveJSON('carelink_settings', s); }
+
+function applySettingsToUI() {
+  const s = getSettings();
+  document.getElementById('languageSelect').value = s.language;
+  document.getElementById('voiceRespToggle').checked = s.voiceResponse;
+  document.getElementById('speedSlider').value = s.speedPercent;
+  document.getElementById('speedLabel').textContent = s.speedPercent + '%';
+  document.getElementById('caregiverEmail').value = s.caregiverEmail || '';
+}
+document.getElementById('languageSelect').onchange = (e) => { const s = getSettings(); s.language = e.target.value; saveSettings(s); };
+document.getElementById('voiceRespToggle').onchange = (e) => { const s = getSettings(); s.voiceResponse = e.target.checked; saveSettings(s); };
+document.getElementById('speedSlider').oninput = (e) => {
+  document.getElementById('speedLabel').textContent = e.target.value + '%';
+  const s = getSettings(); s.speedPercent = Number(e.target.value); saveSettings(s);
+};
+document.getElementById('saveEmailBtn').onclick = () => {
+  const email = document.getElementById('caregiverEmail').value.trim();
+  const s = getSettings(); s.caregiverEmail = email; saveSettings(s);
+  alert('Caregiver email saved.');
+};
+
+/* =========================================================
+   Speech recognition + language handling
+   ========================================================= */
+const transcriptDiv = document.getElementById('transcript');
+const voiceBtn = document.getElementById('voiceBtn');
+let recognizer = null;
+const SpeechRecognitionImpl = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+function pickAutoLang() {
+  const nav = (navigator.language || 'en-US');
+  return nav.toLowerCase().startsWith('hi') ? 'hi-IN' : 'en-US';
+}
+function currentRecognitionLang() {
+  const choice = getSettings().language;
+  if (choice === 'auto') return localStorage.getItem('carelink_last_detected_lang') || pickAutoLang();
+  if (choice === 'hinglish') return 'en-IN';
+  return choice;
+}
+
+let lastAIReply = '';
+
+if (SpeechRecognitionImpl) {
+  recognizer = new SpeechRecognitionImpl();
+  recognizer.interimResults = false;
+  recognizer.maxAlternatives = 1;
+
+  recognizer.onresult = async (event) => {
+    const spoken = event.results[0][0].transcript;
+    const detectedLang = /[\u0900-\u097F]/.test(spoken) ? 'hi-IN' : 'en-US';
+    if (getSettings().language === 'auto') localStorage.setItem('carelink_last_detected_lang', detectedLang);
+
+    transcriptDiv.textContent = `You said (${detectedLang}): "${spoken}"`;
+    await sendToAI(spoken, detectedLang, getSettings().language);
+    voiceBtn.disabled = false;
+  };
+  recognizer.onerror = (e) => {
+    console.error('Speech error', e);
+    transcriptDiv.textContent = 'Speech error: ' + e.error;
+    voiceBtn.disabled = false;
+  };
+  recognizer.onend = () => { voiceBtn.disabled = false; };
+} else {
+  console.warn('Web Speech API not supported in this browser');
+}
+
+let micGranted = false;
+voiceBtn.onclick = async () => {
+  if (!recognizer) { alert('Your browser does not support speech recognition. Try Chrome.'); return; }
+  if (!GROQ_API_KEY || GROQ_API_KEY === 'YOUR_GROQ_API_KEY') {
+    alert('Add your Groq API key at the top of the <script> (GROQ_API_KEY) before using voice.');
+    return;
+  }
+  if (!micGranted) {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      micGranted = true;
+    } catch (err) { alert('Microphone permission denied'); return; }
+  }
+
+  recognizer.lang = currentRecognitionLang();
+  voiceBtn.disabled = true;
+  transcriptDiv.textContent = 'Listening...';
+  try { recognizer.start(); }
+  catch (err) { console.error(err); voiceBtn.disabled = false; }
+};
+
+document.getElementById('replayBtn').onclick = () => {
+  if (lastAIReply) speak(lastAIReply, currentRecognitionLang() === 'hi-IN' ? 'hi-IN' : 'en-US');
+  else speak("Namaste! I'm here to help you. Press the big button and talk to me!", 'en-US');
+};
+
+/* =========================================================
+   AI call (Groq)
+   ========================================================= */
+async function sendToAI(spoken, lang, modeChoice) {
+  const langLabel = modeChoice === 'hinglish' ? 'Hinglish (mixed Hindi and English)' : (lang === 'hi-IN' ? 'Hindi' : 'English');
+  const systemPrompt =
+    'You are a caring voice assistant for an elderly user, part of a family safety app called CareLink. ' +
+    `Reply in ${langLabel}, matching the user's own language/style (support natural Hinglish code-switching if that fits). ` +
+    'Classify the message intent as exactly one of: "chat", "task", or "emergency". ' +
+    '"task" = something to remember/schedule (medicine, meals, appointments). ' +
+    '"emergency" = signs of injury, distress, confusion, or urgent danger. ' +
+    'Respond with ONLY a JSON object, no markdown fences, no extra text, in this exact shape: ' +
+    '{"intent": "chat|task|emergency", "reply": "short spoken-style reply", "reminder_text": "short description or empty string if intent is not task", "reminder_time": "ISO 8601 datetime guess or empty string if unknown/not task"}';
+
+  try {
+    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `(User is speaking in ${langLabel}) ${spoken}` }
+        ]
+      })
+    });
+
+    if (!resp.ok) {
+      const errBody = await resp.text();
+      console.error('Groq API error', resp.status, errBody);
+      transcriptDiv.textContent += `\n[AI error ${resp.status}: ${errBody.slice(0, 200)}]`;
+      return;
+    }
+
+    const data = await resp.json();
+    const raw = data.choices?.[0]?.message?.content || '';
+    const cleaned = raw.replace(/```json|```/g, '').trim();
+    let parsed;
+    try { parsed = JSON.parse(cleaned); }
+    catch (e) { parsed = { intent: 'chat', reply: raw, reminder_text: '', reminder_time: '' }; }
+
+    const reply = parsed.reply || '(no reply)';
+    lastAIReply = reply;
+    transcriptDiv.textContent += `\nAI: ${reply}`;
+    // Detect language of the AI's actual reply text (Devanagari = Hindi)
+    // regardless of what language mode is selected in settings.
+    const replyIsHindi = /[\u0900-\u097F]/.test(reply);
+    if (getSettings().voiceResponse) speak(reply, replyIsHindi ? 'hi-IN' : 'en-US');
+
+    if (parsed.intent === 'task') {
+      addReminder({ text: parsed.reminder_text || spoken, frequency: 'once', dateTimeISO: parsed.reminder_time || new Date().toISOString() });
+      addNotification('task', `Reminder set: ${parsed.reminder_text || spoken}`, spoken);
+    } else if (parsed.intent === 'emergency') {
+      await raiseEmergencyAlert(spoken);
+    }
+    // chat intent: no notification — it spams the feed
+  } catch (e) {
+    console.error(e);
+    const hint = /Failed to fetch|NetworkError|CORS/i.test(String(e))
+      ? ' — this looks like a CORS/network block (common when opening the file directly). See the note below the mic button.'
+      : '';
+    transcriptDiv.textContent += `\n[Error contacting AI: ${e.message || e}]${hint}`;
+  }
+}
+
+let availableVoices = [];
+function loadVoices() { availableVoices = window.speechSynthesis?.getVoices() || []; }
+if ('speechSynthesis' in window) {
+  loadVoices();
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+function speak(text, lang) {
+  if (!('speechSynthesis' in window) || !text) return;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = lang || 'en-US';
+  utterance.rate = (getSettings().speedPercent || 100) / 100;
+
+  // Try to find a voice that actually matches the target language, so Hindi
+  // doesn't get read out by a default English voice with a phonetic accent.
+  const wantHindi = (lang || '').toLowerCase().startsWith('hi');
+  const match = availableVoices.find(v => v.lang?.toLowerCase().startsWith(wantHindi ? 'hi' : 'en'));
+  if (match) utterance.voice = match;
+  else if (wantHindi) {
+    console.warn('No Hindi voice found on this device/browser — falling back to default voice (may sound off).');
+  }
+
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utterance);
+}
+
+/* =========================================================
+   Small helpers
+   ========================================================= */
+function escapeHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* Mark activity read whenever the Activity tab or bell is opened */
+const _origSwitchTab = switchTab;
+switchTab = function(tab) {
+  _origSwitchTab(tab);
+  if (tab === 'activity') markAllRead();
+};
+</script>
+</body>
+</html>
